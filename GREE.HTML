@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מחשבון גז GREE - תדיראן</title>
+    <style>
+        :root { --gree-blue: #0056b3; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; text-align: right; }
+        .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid var(--gree-blue); margin-bottom: 20px; padding-bottom: 10px; }
+        h2 { color: var(--gree-blue); margin: 0; font-size: 22px; }
+        
+        label { display: block; margin: 15px 0 5px; font-weight: bold; color: #444; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; background: white; }
+        
+        .pipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
+        .pipe-group { background: #f1f1f1; padding: 10px; border-radius: 8px; }
+        
+        .result-box { background: #e7f3ff; padding: 20px; border-radius: 12px; text-align: center; margin-top: 25px; border: 2px solid var(--gree-blue); }
+        .total-val { font-size: 36px; color: var(--gree-blue); font-weight: 900; display: block; }
+        
+        .btn-clear { width: 100%; padding: 15px; background: #dc3545; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; font-size: 16px; cursor: pointer; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>מחשבון גז GREE</h2>
+    </div>
+
+    <label>סוג מערכת:</label>
+    <select id="sysType" onchange="updateModels()">
+        <option value="MINI">MINI (מיני VRF)</option>
+        <option value="MODULAR">MODULAR (מודולרי)</option>
+    </select>
+
+    <label>דגם מעבה:</label>
+    <select id="modelSelect" onchange="handleModelChange()">
+        </select>
+
+    <div class="pipe-group">
+        <label style="margin-top:0">אורך צנרת (מטרים):</label>
+        <div class="pipe-grid">
+            <div><label style="font-size:12px">1/4" (22ג)</label><input type="number" id="p14" oninput="calculate()"></div>
+            <div><label style="font-size:12px">3/8" (54ג)</label><input type="number" id="p38" oninput="calculate()"></div>
+            <div><label style="font-size:12px">1/2" (110ג)</label><input type="number" id="p12" oninput="calculate()"></div>
+            <div><label style="font-size:12px">5/8" (170ג)</label><input type="number" id="p58" oninput="calculate()"></div>
+            <div><label style="font-size:12px">3/4" (250ג)</label><input type="number" id="p34" oninput="calculate()"></div>
+            <div><label style="font-size:12px">7/8" (350ג)</label><input type="number" id="p78" oninput="calculate()"></div>
+        </div>
+    </div>
+
+    <div id="unitCountSection">
+        <label>כמות מאיידים במערכת:</label>
+        <input type="number" id="unitCount" placeholder="הזן מספר יחידות" oninput="calculate()">
+    </div>
+
+    <div id="ratioSection" class="hidden">
+        <label>יחס העמסה (Ratio):</label>
+        <select id="ratio" onchange="calculate()">
+            <option value="">-- בחר יחס --</option>
+            <option value="50-70">50-70%</option>
+            <option value="70-90">70-90%</option>
+            <option value="90-105">90-105%</option>
+        </select>
+    </div>
+
+    <div class="result-box">
+        <span style="color: #555;">סה"כ תוספת גז למערכת:</span>
+        <span class="total-val"><span id="totalResult">0.00</span> ק"ג</span>
+    </div>
+
+    <button class="btn-clear" onclick="clearAll()">נקה נתונים</button>
+</div>
+
+<script>
+    // טבלת נתוני מודולרי מלאה מה-DATA שלך
+    const greeModTable = {
+        "MODULAR 224": { "50-70": [0, 0.5], "70-90": [0.5, 1.0], "90-105": [1.0, 2.0] },
+        "MODULAR 280": { "50-70": [0, 1.0], "70-90": [1.0, 1.0], "90-105": [1.0, 2.0] },
+        "MODULAR 335": { "50-70": [0, 1.0], "70-90": [1.0, 1.0], "90-105": [1.0, 2.0] },
+        "MODULAR 400": { "50-70": [0, 2.0], "70-90": [2.0, 2.0], "90-105": [2.0, 4.0] },
+        "MODULAR 450": { "50-70": [0, 1.0], "70-90": [2.0, 2.0], "90-105": [2.0, 4.0] },
+        "MODULAR 504": { "50-70": [0, 0.5], "70-90": [1.5, 2.5], "90-105": [2.5, 4.0] },
+        "MODULAR 560": { "50-70": [0, 1.0], "70-90": [2.0, 3.0], "90-105": [3.0, 5.0] },
+        "MODULAR 615": { "50-70": [0, 1.5], "70-90": [2.0, 3.5], "90-105": [3.5, 5.0] },
+        "MODULAR 680": { "50-70": [0, 1.5], "70-90": [2.0, 3.5], "90-105": [3.5, 5.0] },
+        "MODULAR 730": { "50-70": [0, 2.0], "70-90": [3.0, 4.0], "90-105": [4.0, 6.0] },
+        "MODULAR 1010": { "50-70": [0, 2.0], "70-90": [3.0, 4.0], "90-105": [5.0, 7.0] }
+    };
+
+    const miniModels = ["MINI 80", "MINI 100", "MINI 120", "MINI 140", "MINI 160", "MINI 224", "MINI 280", "MINI 335"];
+
+    function updateModels() {
+        const type = document.getElementById('sysType').value;
+        const modelSelect = document.getElementById('modelSelect');
+        modelSelect.innerHTML = '';
+        
+        const list = (type === 'MINI') ? miniModels : Object.keys(greeModTable);
+        
+        list.forEach(m => {
+            let opt = document.createElement('option');
+            opt.value = m; opt.innerHTML = m;
+            modelSelect.appendChild(opt);
+        });
+        handleModelChange();
+    }
+
+    function handleModelChange() {
+        const type = document.getElementById('sysType').value;
+        const model = document.getElementById('modelSelect').value;
+        
+        // יחס העמסה - רק במודולרי
+        document.getElementById('ratioSection').classList.toggle('hidden', type !== 'MODULAR');
+        
+        // כמות מאיידים - במינית קטנה (80-160) או במודולרי
+        const isSmallMini = ["MINI 80", "MINI 100", "MINI 120", "MINI 140", "MINI 160"].includes(model);
+        document.getElementById('unitCountSection').classList.toggle('hidden', type === 'MINI' && !isSmallMini);
+        
+        calculate();
+    }
+
+    function calculate() {
+        const type = document.getElementById('sysType').value;
+        const model = document.getElementById('modelSelect').value;
+        const units = parseInt(document.getElementById('unitCount').value) || 0;
+        const ratio = document.getElementById('ratio').value;
+        
+        let pipeGram = (parseFloat(document.getElementById('p14').value) || 0) * 22 +
+                       (parseFloat(document.getElementById('p38').value) || 0) * 54 +
+                       (parseFloat(document.getElementById('p12').value) || 0) * 110 +
+                       (parseFloat(document.getElementById('p58').value) || 0) * 170 +
+                       (parseFloat(document.getElementById('p34').value) || 0) * 250 +
+                       (parseFloat(document.getElementById('p78').value) || 0) * 350;
+
+        let extraGram = 0;
+        if (type === "MINI") {
+            const smallMini = ["MINI 80", "MINI 100", "MINI 120", "MINI 140", "MINI 160"];
+            if (smallMini.includes(model) && units > 2) extraGram = (units - 2) * 300;
+        } else if (type === "MODULAR" && greeModTable[model] && ratio) {
+            const isAbove4 = units >= 4 ? 1 : 0;
+            extraGram = greeModTable[model][ratio][isAbove4] * 1000;
+        }
+        
+        document.getElementById('totalResult').innerText = ((pipeGram + extraGram) / 1000).toFixed(2);
+    }
+
+    function clearAll() {
+        document.querySelectorAll('input').forEach(i => i.value = "");
+        document.getElementById('ratio').value = "";
+        calculate();
+    }
+
+    // הפעלה ראשונית
+    updateModels();
+</script>
+
+</body>
+</html>
