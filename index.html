@@ -3,189 +3,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מחשבון גז GREE - תדיראן</title>
+    <title>Tadiran VRF Gas Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --gree-blue: #0056b3; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); margin: 0; padding: 15px; text-align: right; }
-        .container { max-width: 450px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid var(--gree-blue); margin-bottom: 20px; padding-bottom: 10px; }
-        h2 { color: var(--gree-blue); margin: 0; font-size: 22px; }
-        label { display: block; margin: 15px 0 5px; font-weight: bold; color: #444; }
-        select, input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; background: white; margin-bottom: 5px; }
-        .pipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
-        .pipe-group, .model-group { background: #f1f1f1; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
-        .result-box { background: #e7f3ff; padding: 20px; border-radius: 12px; text-align: center; margin-top: 25px; border: 2px solid var(--gree-blue); }
-        .total-val { font-size: 36px; color: var(--gree-blue); font-weight: 900; display: block; }
-        .btn-clear { width: 100%; padding: 15px; background: #dc3545; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 15px; font-size: 16px; cursor: pointer; }
+        :root {
+            --tadiran-blue: #003399;
+            --prime-orange: #ff6600;
+            --toshiba-red: #e4002b;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: #ffffff;
+            --text-main: #2d3436;
+            --highlight-color: #d63031;
+            --clear-btn-bg: #d63031; /* צבע רקע אדום לכפתור */
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background: var(--bg-gradient);
+            margin: 0; padding: 10px;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 10px auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: var(--tadiran-blue);
+            padding: 20px 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .app-header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 1px; }
+
+        .content-padding { padding: 15px; }
+
+        .brand-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .brand-card {
+            padding: 10px;
+            border: 2px solid #edf2f7;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 700;
+            font-size: 14px;
+            background: #f8f9fc;
+        }
+
+        .brand-card.active-gree { border-color: var(--tadiran-blue); background: #ebf4ff; color: var(--tadiran-blue); }
+        .brand-card.active-prime { border-color: var(--prime-orange); background: #fff5eb; color: var(--prime-orange); }
+        .brand-card.active-toshiba { border-color: var(--toshiba-red); background: #fef2f2; color: var(--toshiba-red); }
+
+        .section-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--tadiran-blue); }
+        
+        .pipe-title { 
+            font-size: 18px; 
+            font-weight: 800; 
+            margin-bottom: 12px; 
+            color: var(--highlight-color); 
+            text-decoration: underline;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        
+        select, input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1.5px solid #e2e8f0; 
+            border-radius: 10px; 
+            font-size: 16px; 
+            box-sizing: border-box; 
+            margin-bottom: 8px;
+        }
+
+        .pipe-card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .pipe-item label { font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 4px; display: block; }
+        .factor-tag { font-weight: 400; color: #64748b; font-size: 11px; margin-right: 4px; }
+
+        .result-container {
+            margin-top: 25px;
+            background: var(--tadiran-blue);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .result-value { font-size: 40px; font-weight: 800; display: block; }
+        
+        /* כפתור נקה נתונים - הכל באדום עם כיתוב לבן */
+        .btn-clear { 
+            width: 100%; 
+            background: var(--clear-btn-bg); 
+            border: 2px solid var(--clear-btn-bg); 
+            color: #ffffff;
+            padding: 12px; 
+            border-radius: 10px; 
+            font-weight: 800; 
+            margin-top: 15px; 
+            cursor: pointer; 
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(214, 48, 49, 0.2);
+        }
+        .btn-clear:active { 
+            background: #b71c1c; 
+            border-color: #b71c1c;
+            transform: scale(0.98); 
+        }
+
         .hidden { display: none !important; }
-        .model-row { margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-        .model-row:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <h2>מחשבון גז GREE</h2>
-    </div>
+<div class="app-container">
+    <header class="app-header" id="mainHeader">
+        <h1>TADIRAN VRF</h1>
+        <p>מחשבון תוספת גז</p>
+    </header>
 
-    <label>סוג מערכת:</label>
-    <select id="sysType" onchange="initApp()">
-        <option value="MINI">MINI (מיני VRF)</option>
-        <option value="MODULAR">MODULAR (מודולרי)</option>
-    </select>
+    <div class="content-padding">
+        <div class="section-title">בחר מותג:</div>
+        <div class="brand-grid">
+            <div class="brand-card" id="cardGree" onclick="selectBrand('GREE')">GREE</div>
+            <div class="brand-card" id="cardPrime" onclick="selectBrand('PRIME')">PRIME</div>
+            <div class="brand-card" id="cardToshiba" onclick="selectBrand('TOSHIBA')">TOSHIBA</div>
+        </div>
 
-    <div class="model-group">
-        <label id="modelLabel">בחר מעבה/ים:</label>
-        <div id="modelList">
+        <div id="calculatorBody" class="hidden">
+            <div class="input-group">
+                <label class="section-title">סוג מערכת:</label>
+                <select id="sysType" onchange="initModels()">
+                    <option value="MINI">MINI (מיני VRF)</option>
+                    <option value="MODULAR">MODULAR (מודולרי)</option>
+                </select>
             </div>
-    </div>
 
-    <div class="pipe-group">
-        <label style="margin-top:0">אורך צנרת (מטרים):</label>
-        <div class="pipe-grid">
-            <div><label style="font-size:12px">1/4" (22ג)</label><input type="number" id="p14" oninput="calculate()"></div>
-            <div><label style="font-size:12px">3/8" (54ג)</label><input type="number" id="p38" oninput="calculate()"></div>
-            <div><label style="font-size:12px">1/2" (110ג)</label><input type="number" id="p12" oninput="calculate()"></div>
-            <div><label style="font-size:12px">5/8" (170ג)</label><input type="number" id="p58" oninput="calculate()"></div>
-            <div><label style="font-size:12px">3/4" (250ג)</label><input type="number" id="p34" oninput="calculate()"></div>
-            <div><label style="font-size:12px">7/8" (350ג)</label><input type="number" id="p78" oninput="calculate()"></div>
-            <div><label style="font-size:12px">1" (520ג)</label><input type="number" id="p10" oninput="calculate()"></div>
-            <div><label style="font-size:12px">1.1/8" (680ג)</label><input type="number" id="p118" oninput="calculate()"></div>
+            <div class="input-group">
+                <label class="section-title" id="modelLabel">בחר דגם:</label>
+                <div id="modelList"></div>
+            </div>
+
+            <div class="input-group">
+                <div class="pipe-title">אורך צנרת נוזל בלבד! (מטרים)</div>
+                <div class="pipe-card-grid" id="pipeGrid">
+                    <div class="pipe-item" id="row14"><label>1/4" <span class="factor-tag" id="f14"></span></label><input type="number" id="p14" placeholder="0" oninput="calculate()"></div>
+                    <div class="pipe-item" id="row38"><label>3/8" <span class="factor-tag" id="f38"></span></label><input type="number" id="p38" placeholder="0" oninput="calculate()"></div>
+                    <div class="pipe-item" id="row12"><label>1/2" <span class="factor-tag" id="f12"></span></label><input type="number" id="p12" placeholder="0" oninput="calculate()"></div>
+                    <div class="pipe-item" id="row58"><label>5/8" <span class="factor-tag" id="f58"></span></label><input type="number" id="p58" placeholder="0" oninput="calculate()"></div>
+                    <div class="pipe-item" id="row34"><label>3/4" <span class="factor-tag" id="f34"></span></label><input type="number" id="p34" placeholder="0" oninput="calculate()"></div>
+                    <div class="pipe-item" id="row78"><label>7/8" <span class="factor-tag" id="f78"></span></label><input type="number" id="p78" placeholder="0" oninput="calculate()"></div>
+                    <div class="pipe-item" id="row10"><label>1" <span class="factor-tag" id="f10"></span></label><input type="number" id="p10" placeholder="0" oninput="calculate()"></div>
+                    <div class="pipe-item" id="row118"><label>1.1/8" <span class="factor-tag" id="f118"></span></label><input type="number" id="p118" placeholder="0" oninput="calculate()"></div>
+                </div>
+            </div>
+
+            <div id="extraFields" class="hidden">
+                <div class="input-group" id="unitCountWrapper">
+                    <label class="section-title">כמות מאיידים:</label>
+                    <input type="number" id="unitCount" placeholder="0" oninput="calculate()">
+                </div>
+                <div class="input-group" id="ratioWrapper">
+                    <label class="section-title">יחס העמסה (Ratio):</label>
+                    <select id="ratio" onchange="calculate()">
+                        <option value="">-- בחר יחס --</option>
+                        <option value="50-70">50-70%</option>
+                        <option value="70-90">70-90%</option>
+                        <option value="90-105">90-105%</option>
+                        <option value="105-135">105-135%</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="result-container" id="resultBox">
+                <span style="font-size: 14px; opacity: 0.9;">תוספת גז סופית נדרשת</span>
+                <span class="result-value"><span id="totalResult">0.000</span> ק"ג</span>
+            </div>
+            <button class="btn-clear" onclick="clearAll()">נקה נתונים</button>
         </div>
     </div>
-
-    <div id="unitCountSection">
-        <label>כמות מאיידים במערכת:</label>
-        <input type="number" id="unitCount" placeholder="הזן מספר יחידות" oninput="calculate()">
-    </div>
-
-    <div id="ratioSection" class="hidden">
-        <label>יחס העמסה (Ratio):</label>
-        <select id="ratio" onchange="calculate()">
-            <option value="">-- בחר יחס --</option>
-            <option value="50-70">50-70%</option>
-            <option value="70-90">70-90%</option>
-            <option value="90-105">90-105%</option>
-            <option value="105-135">105-135%</option>
-        </select>
-    </div>
-
-    <div class="result-box">
-        <span style="color: #555;">סה"כ תוספת גז למערכת:</span>
-        <span class="total-val"><span id="totalResult">0.00</span> ק"ג</span>
-    </div>
-
-    <button class="btn-clear" onclick="clearAll()">נקה נתונים</button>
 </div>
 
 <script>
-    const greeModTable = {
-        "MODULAR 224": { "50-70": [0, 0.5], "70-90": [0.5, 1], "90-105": [1, 2], "105-135": [2, 3.5] },
-        "MODULAR 280": { "50-70": [0, 1], "70-90": [1, 1], "90-105": [1, 2], "105-135": [2, 4] },
-        "MODULAR 335": { "50-70": [0, 1], "70-90": [1, 1], "90-105": [1, 2], "105-135": [2, 4] },
-        "MODULAR 400": { "50-70": [0, 1], "70-90": [2, 2], "90-105": [2, 4], "105-135": [3, 5] },
-        "MODULAR 450": { "50-70": [0, 1], "70-90": [2, 2], "90-105": [2, 4], "105-135": [3, 5] },
-        "MODULAR 504": { "50-70": [0, 0.5], "70-90": [1.5, 2.5], "90-105": [2.5, 4], "105-135": [3.5, 5.5] },
-        "MODULAR 560": { "50-70": [0, 1], "70-90": [2, 3], "90-105": [3, 5], "105-135": [4, 6] },
-        "MODULAR 615": { "50-70": [0, 1.5], "70-90": [2, 3.5], "90-105": [3.5, 5], "105-135": [4, 6] },
-        "MODULAR 680": { "50-70": [0, 1.5], "70-90": [2, 3.5], "90-105": [3.5, 5], "105-135": [4, 6] },
-        "MODULAR 730": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 6], "105-135": [6, 7] },
-        "MODULAR 785": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 6], "105-135": [6, 7] },
-        "MODULAR 850": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 6], "105-135": [6, 7] },
-        "MODULAR 900": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 7], "105-135": [7, 8] },
-        "MODULAR 952": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 7], "105-135": [7, 8] },
-        "MODULAR 1010": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 7], "105-135": [7, 8] }
+    let currentBrand = '';
+    const pipeFactors = {
+        GREE: { "1/4": 22, "3/8": 54, "1/2": 110, "5/8": 170, "3/4": 250, "7/8": 350, "1": 520, "1 1/8": 680 },
+        PRIME: { "1/4": 22, "3/8": 54, "1/2": 110, "5/8": 170, "3/4": 250, "7/8": 350 },
+        TOSHIBA: { "1/4": 25, "3/8": 55, "1/2": 105, "5/8": 160, "3/4": 250, "7/8": 350, "1": 470 }
     };
 
-    const miniModels = ["MINI 80", "MINI 100", "MINI 120", "MINI 140", "MINI 160", "MINI 224", "MINI 280", "MINI 335"];
+    const greeFullData = {
+        "224": { "50-70": [0, 0.5], "70-90": [0.5, 1], "90-105": [1, 2], "105-135": [2, 3.5] },
+        "280": { "50-70": [0, 1], "70-90": [1, 1], "90-105": [1, 2], "105-135": [2, 4] },
+        "335": { "50-70": [0, 1], "70-90": [1, 1], "90-105": [1, 2], "105-135": [2, 4] },
+        "400": { "50-70": [0, 1], "70-90": [2, 2], "90-105": [2, 4], "105-135": [3, 5] },
+        "450": { "50-70": [0, 1], "70-90": [2, 2], "90-105": [2, 4], "105-135": [3, 5] },
+        "504": { "50-70": [0, 0.5], "70-90": [1.5, 2.5], "90-105": [2.5, 4], "105-135": [3.5, 5.5] },
+        "560": { "50-70": [0, 1], "70-90": [2, 3], "90-105": [3, 5], "105-135": [4, 6] },
+        "615": { "50-70": [0, 1.5], "70-90": [2, 3.5], "90-105": [3.5, 5], "105-135": [4, 6] },
+        "680": { "50-70": [0, 1.5], "70-90": [2, 3.5], "90-105": [3.5, 5], "105-135": [4, 6] },
+        "730": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 6], "105-135": [6, 7] },
+        "785": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 6], "105-135": [6, 7] },
+        "850": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 6], "105-135": [6, 7] },
+        "900": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 7], "105-135": [7, 8] },
+        "952": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 7], "105-135": [7, 8] },
+        "1010": { "50-70": [0, 2], "70-90": [3, 4], "90-105": [5, 7], "105-135": [7, 8] }
+    };
 
-    function initApp() {
+    function selectBrand(brand) {
+        currentBrand = brand;
+        document.getElementById('calculatorBody').classList.remove('hidden');
+        document.getElementById('cardGree').className = 'brand-card' + (brand === 'GREE' ? ' active-gree' : '');
+        document.getElementById('cardPrime').className = 'brand-card' + (brand === 'PRIME' ? ' active-prime' : '');
+        document.getElementById('cardToshiba').className = 'brand-card' + (brand === 'TOSHIBA' ? ' active-toshiba' : '');
+        
+        const header = document.getElementById('mainHeader');
+        const resBox = document.getElementById('resultBox');
+        header.style.background = brand === 'GREE' ? '#003399' : (brand === 'PRIME' ? '#ff6600' : '#e4002b');
+        resBox.style.background = header.style.background;
+
+        const f = pipeFactors[brand];
+        ["14","38","12","58","34","78"].forEach(id => {
+            const label = id.charAt(0)+"/"+id.charAt(1);
+            if(document.getElementById('f'+id)) document.getElementById('f'+id).innerText = `(${f[label]}g)`;
+        });
+        if(f["1"]) document.getElementById('f10').innerText = `(${f["1"]}g)`;
+        if(f["1 1/8"]) document.getElementById('f118').innerText = `(${f["1 1/8"]}g)`;
+
+        initModels();
+    }
+
+    function initModels() {
         const type = document.getElementById('sysType').value;
-        const modelList = document.getElementById('modelList');
-        const ratioSection = document.getElementById('ratioSection');
-        modelList.innerHTML = '';
+        const list = document.getElementById('modelList');
+        const label = document.getElementById('modelLabel');
+        list.innerHTML = '';
+        
+        let count = (currentBrand === 'GREE' && type === 'MODULAR') ? 4 : 1;
+        label.innerText = count > 1 ? "בחר עד 4 מעבים:" : "בחר דגם:";
+        
+        for(let i=1; i<=count; i++) {
+            const select = document.createElement('select');
+            select.id = "modelSelect" + i;
+            select.onchange = function() { toggleUI(); calculate(); };
+            const def = document.createElement('option');
+            def.value = ""; 
+            def.innerText = count > 1 ? `-- מעבה ${i} --` : "-- בחר דגם --";
+            select.appendChild(def);
 
-        if (type === 'MINI') {
-            ratioSection.classList.add('hidden');
-            createModelSelect(1, miniModels);
-        } else {
-            ratioSection.classList.remove('hidden');
-            for (let i = 1; i <= 4; i++) {
-                createModelSelect(i, Object.keys(greeModTable), true);
+            let models = [];
+            if(currentBrand === 'TOSHIBA') {
+                models = type === 'MINI' ? ["MINI 0404", "MINI 0504", "MINI 0604"] : ["בקרוב..."];
+            } else if(currentBrand === 'PRIME') {
+                models = type === 'MINI' ? ["PRIME 032", "PRIME 04", "PRIME 05", "PRIME 06", "PRIME 07", "PRIME 08", "PRIME 10", "PRIME 12"] : ["MODULAR 08", "MODULAR 10", "MODULAR 12", "MODULAR 14", "MODULAR 16", "MODULAR 18", "MODULAR 20", "MODULAR 22", "MODULAR 24", "MODULAR 26"];
+            } else { // GREE
+                models = type === 'MINI' ? ["80", "100", "120", "140", "160", "224", "280", "335"] : Object.keys(greeFullData);
             }
+
+            models.forEach(m => { 
+                let o = document.createElement('option'); 
+                o.value = m; o.innerText = m; 
+                select.appendChild(o); 
+            });
+            list.appendChild(select);
         }
+        toggleUI();
         calculate();
     }
 
-    function createModelSelect(index, list, isModular = false) {
-        const modelList = document.getElementById('modelList');
-        const select = document.createElement('select');
-        select.id = 'modelSelect' + index;
-        select.onchange = calculate;
+    function toggleUI() {
+        const type = document.getElementById('sysType').value;
+        const model = document.getElementById('modelSelect1')?.value;
         
-        const defaultOpt = document.createElement('option');
-        defaultOpt.value = "";
-        defaultOpt.innerHTML = isModular ? "-- בחר מעבה " + index + " --" : "-- בחר דגם --";
-        select.appendChild(defaultOpt);
+        document.querySelectorAll('.pipe-item').forEach(el => el.classList.add('hidden'));
+        
+        if (currentBrand === 'GREE' && type === 'MINI') {
+            document.getElementById('row14').classList.remove('hidden');
+            document.getElementById('row38').classList.remove('hidden');
+            if (model === "335") document.getElementById('row12').classList.remove('hidden');
+        } 
+        else if (currentBrand === 'PRIME' && type === 'MINI') {
+            document.getElementById('row14').classList.remove('hidden');
+            document.getElementById('row38').classList.remove('hidden');
+            if (model === "PRIME 12") document.getElementById('row12').classList.remove('hidden');
+        }
+        else {
+            document.getElementById('row14').classList.remove('hidden');
+            document.getElementById('row38').classList.remove('hidden');
+            document.getElementById('row12').classList.remove('hidden');
+            document.getElementById('row58').classList.remove('hidden');
+            document.getElementById('row34').classList.remove('hidden');
+            document.getElementById('row78').classList.remove('hidden');
+            if(currentBrand !== 'PRIME') document.getElementById('row10').classList.remove('hidden');
+            if(currentBrand === 'GREE') document.getElementById('row118').classList.remove('hidden');
+        }
 
-        list.forEach(m => {
-            let opt = document.createElement('option');
-            opt.value = m; opt.innerHTML = m;
-            select.appendChild(opt);
-        });
-        modelList.appendChild(select);
+        const isPrimeModular = (currentBrand === 'PRIME' && type === 'MODULAR');
+        const isToshiba = currentBrand === 'TOSHIBA';
+        const isPrimeMini = (currentBrand === 'PRIME' && type === 'MINI');
+
+        document.getElementById('extraFields').classList.toggle('hidden', isPrimeModular || isToshiba || isPrimeMini);
+        
+        const isGreeMiniLarge = (currentBrand === 'GREE' && type === 'MINI' && ["224", "280", "335"].includes(model));
+        document.getElementById('unitCountWrapper').classList.toggle('hidden', isGreeMiniLarge || isPrimeModular);
+        document.getElementById('ratioWrapper').classList.toggle('hidden', currentBrand !== 'GREE' || type === 'MINI');
     }
 
     function calculate() {
-        const type = document.getElementById('sysType').value;
+        const factors = pipeFactors[currentBrand];
         const units = parseInt(document.getElementById('unitCount').value) || 0;
         const ratio = document.getElementById('ratio').value;
-        
-        let pipeGram = (parseFloat(document.getElementById('p14').value) || 0) * 22 +
-                       (parseFloat(document.getElementById('p38').value) || 0) * 54 +
-                       (parseFloat(document.getElementById('p12').value) || 0) * 110 +
-                       (parseFloat(document.getElementById('p58').value) || 0) * 170 +
-                       (parseFloat(document.getElementById('p34').value) || 0) * 250 +
-                       (parseFloat(document.getElementById('p78').value) || 0) * 350 +
-                       (parseFloat(document.getElementById('p10').value) || 0) * 520 +
-                       (parseFloat(document.getElementById('p118').value) || 0) * 680;
+        const type = document.getElementById('sysType').value;
 
-        let extraGram = 0;
+        let totalG = (parseFloat(document.getElementById('p14').value) || 0) * (factors["1/4"] || 0) +
+                     (parseFloat(document.getElementById('p38').value) || 0) * (factors["3/8"] || 0) +
+                     (parseFloat(document.getElementById('p12').value) || 0) * (factors["1/2"] || 0) +
+                     (parseFloat(document.getElementById('p58').value) || 0) * (factors["5/8"] || 0) +
+                     (parseFloat(document.getElementById('p34').value) || 0) * (factors["3/4"] || 0) +
+                     (parseFloat(document.getElementById('p78').value) || 0) * (factors["7/8"] || 0);
         
-        for (let i = 1; i <= 4; i++) {
-            const select = document.getElementById('modelSelect' + i);
-            if (!select) continue;
-            const model = select.value;
+        if(factors["1"]) totalG += (parseFloat(document.getElementById('p10').value) || 0) * factors["1"];
+        if(factors["1 1/8"]) totalG += (parseFloat(document.getElementById('p118').value) || 0) * factors["1 1/8"];
 
-            if (type === "MINI" && model) {
-                const smallMini = ["MINI 80", "MINI 100", "MINI 120", "MINI 140", "MINI 160"];
-                if (smallMini.includes(model) && units > 2) extraGram += (units - 2) * 300;
-            } else if (type === "MODULAR" && model && greeModTable[model] && ratio) {
-                const isAbove4 = units >= 4 ? 1 : 0;
-                extraGram += greeModTable[model][ratio][isAbove4] * 1000;
+        for(let i=1; i<=4; i++) {
+            const sel = document.getElementById('modelSelect'+i);
+            if(!sel) continue;
+            const model = sel.value;
+            if(!model) continue;
+
+            if(currentBrand === 'GREE') {
+                if(type === 'MINI') {
+                    const smallModels = ["80", "100", "120", "140", "160"];
+                    if(smallModels.includes(model) && units > 2) totalG += (units - 2) * 300;
+                } else if(ratio && greeFullData[model]) {
+                    const isAbove4 = units >= 4 ? 1 : 0;
+                    totalG += greeFullData[model][ratio][isAbove4] * 1000;
+                }
+            } else if(currentBrand === 'PRIME' && type === 'MODULAR') {
+                const primeMap = {"MODULAR 18":0.5, "MODULAR 20":4, "MODULAR 22":4.5, "MODULAR 24":4.5, "MODULAR 26":5};
+                totalG += (primeMap[model] || 0) * 1000;
+            } else if(currentBrand === 'TOSHIBA') {
+                if(model === "MINI 0504") totalG += 400;
+                if(model === "MINI 0604") totalG += 800;
             }
         }
-        
-        // הסתרת כמות מאיידים במיני גדול (כמו קודם)
-        if(type === 'MINI') {
-            const model1 = document.getElementById('modelSelect1').value;
-            const isSmallMini = ["MINI 80", "MINI 100", "MINI 120", "MINI 140", "MINI 160"].includes(model1);
-            document.getElementById('unitCountSection').classList.toggle('hidden', model1 !== "" && !isSmallMini);
-        } else {
-            document.getElementById('unitCountSection').classList.remove('hidden');
-        }
-
-        document.getElementById('totalResult').innerText = ((pipeGram + extraGram) / 1000).toFixed(2);
+        document.getElementById('totalResult').innerText = (totalG / 1000).toFixed(3);
     }
 
-    function clearAll() {
-        document.querySelectorAll('input').forEach(i => i.value = "");
-        document.getElementById('ratio').value = "";
-        initApp();
+    function clearAll() { 
+        document.querySelectorAll('input').forEach(i => i.value = ""); 
+        calculate(); 
     }
-
-    initApp();
 </script>
 </body>
 </html>
