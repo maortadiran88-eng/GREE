@@ -552,6 +552,166 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        /* ===== LANGUAGE SELECTOR ===== */
+        .lang-selector {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .lang-btn {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1.5px solid var(--border);
+            background: var(--surface2);
+            color: var(--text2);
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all var(--transition);
+            font-family: 'Assistant', sans-serif;
+        }
+        .lang-btn.active {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: white;
+        }
+        [data-theme="dark"] .lang-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+
+        /* ===== TECHNICIAN PORTAL ===== */
+        .tech-lock {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .tech-lock .lock-icon { font-size: 48px; margin-bottom: 16px; }
+        .tech-lock h2 { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+        .tech-lock p { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+        .tech-lock input {
+            text-align: center;
+            letter-spacing: 4px;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Assistant', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .btn-login:active { opacity: 0.85; transform: scale(0.98); }
+        .btn-logout {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Assistant', sans-serif;
+            transition: all var(--transition);
+        }
+
+        /* Tech brand selector */
+        .tech-brand-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tech-brand-btn {
+            padding: 12px 8px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 13px;
+            background: var(--surface2);
+            color: var(--text2);
+            transition: all var(--transition);
+        }
+        .tech-brand-btn.active { border-color: var(--blue); background: rgba(0,51,153,0.08); color: var(--blue); }
+        [data-theme="dark"] .tech-brand-btn.active { border-color: var(--accent); background: rgba(0,198,255,0.08); color: var(--accent); }
+
+        /* Tech content */
+        .tech-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .tech-section-header {
+            padding: 14px 16px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface2);
+            user-select: none;
+            transition: background var(--transition);
+        }
+        .tech-section-header:active { opacity: 0.8; }
+        .tech-section-body {
+            padding: 14px 16px;
+            display: none;
+        }
+        .tech-section-body.open { display: block; }
+        .tech-param {
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            align-items: start;
+        }
+        .tech-param:last-child { border-bottom: none; }
+        .tech-param-code {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            color: var(--blue);
+            font-size: 12px;
+            padding: 2px 6px;
+            background: rgba(0,51,153,0.08);
+            border-radius: 4px;
+            text-align: center;
+            direction: ltr;
+            white-space: nowrap;
+        }
+        [data-theme="dark"] .tech-param-code { color: var(--accent); background: rgba(0,198,255,0.08); }
+        .tech-param-text { color: var(--text2); line-height: 1.5; }
+        .tech-note {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.3);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 12px;
+            color: var(--text2);
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        .tech-sub-title {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text3);
+            margin: 14px 0 8px;
+        }
     </style>
 </head>
 <body>
@@ -563,15 +723,21 @@
         <span class="logo-text">Tadiran Tools</span>
     </div>
     <div class="nav-actions">
+        <div class="lang-selector">
+            <button class="lang-btn active" onclick="setLang('he')">עב</button>
+            <button class="lang-btn" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" onclick="setLang('ar')">عر</button>
+        </div>
         <button class="dark-toggle" onclick="toggleDark()" id="darkBtn" title="מצב לילה">🌙</button>
     </div>
 </nav>
 
 <!-- TAB BAR -->
 <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('gas', this)">⚙️ תוספת גז</button>
-    <button class="tab-btn" onclick="switchTab('conv', this)">🔄 המרות</button>
-    <button class="tab-btn" onclick="switchTab('about', this)">ℹ️ אודות</button>
+    <button class="tab-btn active" onclick="switchTab('gas', this)" data-i18n-tab="gas">⚙️ תוספת גז</button>
+    <button class="tab-btn" onclick="switchTab('conv', this)" data-i18n-tab="conv">🔄 המרות</button>
+    <button class="tab-btn" onclick="switchTab('tech', this)" data-i18n-tab="tech">🔧 טכנאים</button>
+    <button class="tab-btn" onclick="switchTab('about', this)" data-i18n-tab="about">ℹ️ אודות</button>
 </div>
 
 <!-- ==============================
@@ -584,12 +750,12 @@
     <div style="background:rgba(255,193,7,0.12);border:1.5px solid rgba(255,193,7,0.45);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start;">
         <span style="font-size:15px;flex-shrink:0;">⚠️</span>
         <p style="font-size:12px;color:var(--text2);line-height:1.6;margin:0;">
-            <strong style="color:var(--text);">הערות שימוש</strong><br>
-            נתוני תוספת הגז מבוססים על מפרטי היצרן. יש לאמת תמיד מול הוראות ההתקנה הרשמיות. החברה לא אחראית לטעויות שימוש.
+            <strong style="color:var(--text);" data-i18n="warning_title">הערות שימוש</strong><br>
+            <span data-i18n="warning_text">נתוני תוספת הגז מבוססים על מפרטי היצרן. יש לאמת תמיד מול הוראות ההתקנה הרשמיות. החברה לא אחראית לטעויות שימוש.</span>
         </p>
     </div>
 
-    <div class="section-label">בחר מותג</div>
+    <div class="section-label" id="sectionBrand">בחר מותג</div>
     <div class="brand-grid">
         <div class="brand-card" id="cardGree"    onclick="selectBrand('GREE')">GREE</div>
         <div class="brand-card" id="cardPrime"   onclick="selectBrand('PRIME')">PRIME</div>
@@ -599,7 +765,7 @@
     <div id="calculatorBody" class="hidden">
 
         <div class="input-wrap">
-            <div class="section-label">סוג מערכת</div>
+            <div class="section-label" id="sectionSysType">סוג מערכת</div>
             <select id="sysType" onchange="initModels()">
                 <option value="MINI">MINI — מיני VRF</option>
                 <option value="MODULAR">MODULAR — מודולרי</option>
@@ -612,7 +778,7 @@
         </div>
 
         <!-- PIPE INPUTS -->
-        <div class="pipe-section-label">אורך צנרת נוזל בלבד (מטרים)</div>
+        <div class="pipe-section-label" id="pipeSectionLabel">אורך צנרת נוזל בלבד (מטרים)</div>
         <div class="pipe-grid" id="pipeGrid">
             <div class="pipe-item hidden" id="row14"><label>1/4" <span class="factor-tag" id="f14"></span></label><input type="number" id="p14" placeholder="0" inputmode="decimal" oninput="calculate()"></div>
             <div class="pipe-item hidden" id="row38"><label>3/8" <span class="factor-tag" id="f38"></span></label><input type="number" id="p38" placeholder="0" inputmode="decimal" oninput="calculate()"></div>
@@ -627,11 +793,11 @@
         <!-- EXTRA FIELDS -->
         <div id="extraFields" class="hidden extra-section" style="margin-top:14px;">
             <div class="input-wrap" id="unitCountWrapper">
-                <div class="section-label">כמות מאיידים</div>
+                <div class="section-label" id="unitCountLabel">כמות מאיידים</div>
                 <input type="number" id="unitCount" placeholder="0" inputmode="numeric" oninput="calculate()">
             </div>
             <div id="ratioWrapper">
-                <div class="section-label">יחס העמסה (Ratio)</div>
+                <div class="section-label" id="ratioLabel">יחס העמסה (Ratio)</div>
                 <select id="ratio" onchange="calculate()">
                     <option value="">— בחר יחס —</option>
                     <option value="50-70">50–70%</option>
@@ -773,7 +939,7 @@
 
         <!-- RESULT -->
         <div class="result-box" id="resultBox" style="background: var(--blue);">
-            <div class="result-label">תוספת גז סופית נדרשת</div>
+            <div class="result-label" id="resultLabel">תוספת גז סופית נדרשת</div>
             <div class="result-value" id="totalResult">0.000</div>
             <div class="result-unit">ק"ג</div>
         </div>
@@ -788,13 +954,13 @@
 <div class="page" id="page-conv">
 
     <div class="conv-card">
-        <div class="conv-card-title"><span>❄️</span> R410A — לחץ ↔ טמפרטורת רוויה</div>
-        <p style="font-size:12px; color:var(--text3); margin-bottom:16px; line-height:1.6;">
+        <div class="conv-card-title"><span>❄️</span> <span id="satTitle">R410A — לחץ ↔ טמפרטורת רוויה</span></div>
+        <p id="satSub" style="font-size:12px; color:var(--text3); margin-bottom:16px; line-height:1.6;">
             מלא <strong>לחץ</strong> <em>או</em> <strong>טמפרטורה</strong> — הכל יחושב אוטומטית
         </p>
 
         <div class="utab">
-            <div class="utab-divider">🔵 לחץ רוויה</div>
+            <div class="utab-divider" id="satPressureDiv">🔵 לחץ רוויה</div>
 
             <div class="urow" data-key="mpa">
                 <div class="urow-brand toshiba-brand">TOSHIBA</div>
@@ -820,7 +986,7 @@
                 </div>
             </div>
 
-            <div class="utab-divider">🌡️ המרה לטמפרטורת רוויה</div>
+            <div class="utab-divider" id="satTempDiv">🌡️ המרה לטמפרטורת רוויה</div>
 
             <div class="urow" data-key="tc">
                 <div class="urow-brand neutral-brand">—</div>
@@ -846,31 +1012,501 @@
 </div>
 
 <!-- ==============================
-     PAGE 3: ABOUT
+     PAGE 3: TECHNICIAN PORTAL
+================================= -->
+<div class="page" id="page-tech">
+
+    <!-- LOCK SCREEN -->
+    <div id="techLock">
+        <div class="tech-lock">
+            <div class="lock-icon">🔐</div>
+            <h2 data-i18n="tech_title">אזור טכנאים</h2>
+            <p data-i18n="tech_subtitle">הזן סיסמה לגישה למידע טכני</p>
+            <input type="password" id="techPassword" placeholder="••••••••••" onkeydown="if(event.key==='Enter')techLogin()">
+            <button class="btn-login" onclick="techLogin()" data-i18n="tech_login">כניסה</button>
+            <div id="techError" style="margin-top:10px;font-size:12px;color:var(--red);display:none;" data-i18n="tech_error">סיסמה שגויה</div>
+        </div>
+    </div>
+
+    <!-- PORTAL CONTENT -->
+    <div id="techPortal" class="hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div style="font-size:13px;font-weight:800;color:var(--text2);" data-i18n="tech_welcome">👨‍🔧 שלום טכנאי</div>
+            <button class="btn-logout" onclick="techLogout()" data-i18n="tech_logout">יציאה</button>
+        </div>
+
+        <!-- BRAND SELECTOR -->
+        <div class="section-label" data-i18n="tech_choose_brand">בחר מותג</div>
+        <div class="tech-brand-grid">
+            <div class="tech-brand-btn" onclick="selectTechBrand('GREE',this)">GREE</div>
+            <div class="tech-brand-btn" onclick="selectTechBrand('PRIME',this)">PRIME</div>
+            <div class="tech-brand-btn" onclick="selectTechBrand('TOSHIBA',this)">TOSHIBA</div>
+        </div>
+
+        <!-- GREE CONTENT -->
+        <div id="tech-gree" class="hidden">
+
+            <!-- עדכון פרמטרים -->
+            <div class="tech-section">
+                <div class="tech-section-header" onclick="toggleTechSection(this)">
+                    <span>⚙️ עדכון פרמטרים — טרמוסטט</span><span>▾</span>
+                </div>
+                <div class="tech-section-body">
+                    <div class="tech-note">כניסה לעדכון פרמטרים: לחיצה ארוכה על <strong>FUNCTION</strong> ← לחיצה <strong>3 פעמים</strong> על MODE ← שוב לחיצה ארוכה על <strong>FUNCTION</strong></div>
+                    <div style="height:10px;"></div>
+                    <div class="tech-param"><span class="tech-param-code">P10</span><span class="tech-param-text">קביעת יחידת מאסטר — להעביר ל-<strong>01</strong></span></div>
+                    <div class="tech-param"><span class="tech-param-code">P11</span><span class="tech-param-text">ביטול שידור העינית בטרמוסטט</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P13</span><span class="tech-param-text">2 טרמוסטטים לאותו מאייד — 01 = Master, 02 = Slave</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P14</span><span class="tech-param-text">מספר מאיידים המחוברים לטרמוסטט אחד (00–16)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P15</span><span class="tech-param-text">הגדרת זיכרון חזרת חשמל (Auto Restart)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P20</span><span class="tech-param-text">מיקום רגש אוויר חוזר (ערכים 01–04)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P21</span><span class="tech-param-text">כיול רגש אוויר חוזר — <strong>קירור</strong> (טווח: −15 עד +15)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P22</span><span class="tech-param-text">כיול רגש אוויר חוזר — <strong>חימום</strong> (טווח: −15 עד +15)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P30</span><span class="tech-param-text">שינוי לחץ סטטי למאייד (01–09 בהתאם לדגם)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P31</span><span class="tech-param-text">גובה תקרה — 00 = רגיל, 01 = תקרה גבוהה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P33</span><span class="tech-param-text">הגדרת טיימרים בטרמוסטט</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P42</span><span class="tech-param-text">שינוי כתובת מאייד — לחץ MODE, השתמש בחיצים לבחירת כתובת</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P48</span><span class="tech-param-text">פתיחת שסתום בחימום במאייד שאינו פעיל</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P50</span><span class="tech-param-text">טמפרטורת יציאת אוויר צח — <strong>קירור</strong> (16–30°C)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P51</span><span class="tech-param-text">טמפרטורת יציאת אוויר צח — <strong>חימום</strong> (16–30°C)</span></div>
+                </div>
+            </div>
+
+            <!-- בדיקת פרמטרים -->
+            <div class="tech-section">
+                <div class="tech-section-header" onclick="toggleTechSection(this)">
+                    <span>🔍 בדיקת פרמטרים — טרמוסטט</span><span>▾</span>
+                </div>
+                <div class="tech-section-body">
+                    <div class="tech-note">כניסה למצב צפייה: לחיצה ארוכה על <strong>FUNCTION</strong> (יופיע C00) ← לחיצה <strong>3 פעמים</strong> על MODE</div>
+                    <div style="height:10px;"></div>
+                    <div class="tech-param"><span class="tech-param-code">C00</span><span class="tech-param-text">כתובת המאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">C02</span><span class="tech-param-text">גודל (הספק) המאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">C03</span><span class="tech-param-text">כמות מאיידים מחוברים במערכת</span></div>
+                    <div class="tech-param"><span class="tech-param-code">C07</span><span class="tech-param-text">טמפרטורת אוויר חוזר (מהמאייד או מהטרמוסטט)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">C12</span><span class="tech-param-text">טמפרטורת סביבה של המעבה (יחידת החוץ)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">C14</span><span class="tech-param-text">טמפרטורת כניסה לסוללת מאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">C15</span><span class="tech-param-text">טמפרטורת סוף סוללת מאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">C16</span><span class="tech-param-text">מצב פתיחת שסתום התפשטות PMV (0–20)</span></div>
+                </div>
+            </div>
+
+            <!-- הגדרות מעבה -->
+            <div class="tech-section">
+                <div class="tech-section-header" onclick="toggleTechSection(this)">
+                    <span>🏭 הגדרות מעבה</span><span>▾</span>
+                </div>
+                <div class="tech-section-body">
+                    <div class="tech-param"><span class="tech-param-code">A6</span><span class="tech-param-text">ביטול מצב קירור / חימום</span></div>
+                    <div class="tech-param"><span class="tech-param-code">A7</span><span class="tech-param-text">הגדרת מצב שקט של המעבה (00–12)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">A8</span><span class="tech-param-text">פתיחת שסתומים</span></div>
+                    <div class="tech-param"><span class="tech-param-code">N5</span><span class="tech-param-text">סידור כתובות דרך מעגל גז 1 — לשימוש כאשר יש כמה מעגלים מחוברים לבקר מרכזי</span></div>
+                    <div class="tech-param"><span class="tech-param-code">C8</span><span class="tech-param-text">ביטול מדחס — 00 = לא מבוטל. <strong>ניתן לבטל רק כאשר יש מודול בודד</strong></span></div>
+                    <div class="tech-param"><span class="tech-param-code">C9</span><span class="tech-param-text">ביטול מנוע מעבה — 00 = לא מבוטל. <strong>ניתן לבטל רק כאשר יש מודול בודד</strong></span></div>
+                    <div class="tech-param"><span class="tech-param-code">CA</span><span class="tech-param-text">ביטול מעבה — 00 = לא מבוטל</span></div>
+                    <div class="tech-param"><span class="tech-param-code">1G</span><span class="tech-param-text">הגדלת לחץ סטטי במעבה (01–04)</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRIME CONTENT -->
+        <div id="tech-prime" class="hidden">
+            <div class="tech-section">
+                <div class="tech-section-header" onclick="toggleTechSection(this)">
+                    <span>🔍 בדיקת פרמטרים — טרמוסטט</span><span>▾</span>
+                </div>
+                <div class="tech-section-body">
+                    <div class="tech-note">כניסה: לחיצה על <strong>MENU</strong> למשך <strong>5 שניות</strong></div>
+                    <div style="height:10px;"></div>
+                    <div class="tech-param"><span class="tech-param-code">A</span><span class="tech-param-text">חיישן טמפרטורת פנים — <strong>Tai</strong></span></div>
+                    <div class="tech-param"><span class="tech-param-code">B</span><span class="tech-param-text">חיישן טמפרטורת פנים — <strong>Tc1</strong></span></div>
+                    <div class="tech-param"><span class="tech-param-code">C</span><span class="tech-param-text">חיישן טמפרטורת פנים — <strong>Tc2</strong></span></div>
+                    <div class="tech-param"><span class="tech-param-code">D</span><span class="tech-param-text">מצב פתיחת שסתום PMV של יחידת פנים</span></div>
+                    <div class="tech-param"><span class="tech-param-code">E</span><span class="tech-param-text">כתובת (ADDRESS) של יחידת הפנים</span></div>
+                    <div class="tech-param"><span class="tech-param-code">F</span><span class="tech-param-text">כתובת ראשית (CENTRAL ADDRESS) של יחידת הפנים</span></div>
+                </div>
+            </div>
+
+            <!-- הגדרות דרך שלט -->
+            <div class="tech-section">
+                <div class="tech-section-header" onclick="toggleTechSection(this)">
+                    <span>🎮 הגדרות דרך שלט</span><span>▾</span>
+                </div>
+                <div class="tech-section-body">
+
+                    <!-- סגירת שסתום -->
+                    <div class="tech-sub-title">1. סגירת שסתום במאייד עילי</div>
+                    <div class="tech-note" style="background:rgba(255,193,7,0.18);border-color:rgba(255,193,7,0.6);font-size:13px;">
+                        ⚠️ במידה ורוצים לסגור שסתום במאייד במצב חימום
+                    </div>
+                    <div style="height:8px;"></div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
+                            <span style="font-size:14px;color:var(--text);">הדלק את המאייד במצב <strong>חימום</strong> על <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">16 מעלות</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
+                            <span style="font-size:14px;color:var(--text);">לחץ על כפתור <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">SLEEP</strong> — <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">3 פעמים</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
+                            <span style="font-size:14px;color:var(--text);">המזגן <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">יצפצף</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</span>
+                            <span style="font-size:14px;color:var(--text);">עלה ל-<strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">17 מעלות</strong> ואז <strong>כבה</strong> את המזגן</span>
+                        </div>
+                    </div>
+
+                    <div style="height:16px;"></div>
+
+                    <!-- חזרה מהפסקת חשמל -->
+                    <div class="tech-sub-title">2. חזרה מהפסקת חשמל (Auto Restart)</div>
+                    <div class="tech-note">בטרמוסטט — לחץ על <strong>MENU</strong> | בשלט — לחץ על <strong>SLEEP</strong><br>יש ללחוץ <strong>10 פעמים</strong> בהפרש של <strong>5 שניות</strong> בין כל לחיצה</div>
+                    <div style="height:8px;"></div>
+                    <div class="tech-param">
+                        <span class="tech-param-code">🔔🔔</span>
+                        <span class="tech-param-text"><strong>2 צפצופים</strong> — Auto Restart <strong>מבוטל</strong></span>
+                    </div>
+                    <div class="tech-param">
+                        <span class="tech-param-code">🔔🔔🔔🔔</span>
+                        <span class="tech-param-text"><strong>4 צפצופים</strong> — Auto Restart <strong>פעיל</strong> (ידלק בחזרת חשמל)</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- TOSHIBA CONTENT -->
+        <div id="tech-toshiba" class="hidden">
+
+            <!-- בדיקת פרמטרים מאייד -->
+            <div class="tech-section">
+                <div class="tech-section-header" onclick="toggleTechSection(this)">
+                    <span>🔍 בדיקת פרמטרים — מאייד (טרמוסטט)</span><span>▾</span>
+                </div>
+                <div class="tech-section-body">
+                    <div class="tech-param"><span class="tech-param-code">00</span><span class="tech-param-text">בדיקת טמפרטורה אחרי תיקון</span></div>
+                    <div class="tech-param"><span class="tech-param-code">01</span><span class="tech-param-text">טמפרטורת טרמוסטט</span></div>
+                    <div class="tech-param"><span class="tech-param-code">02</span><span class="tech-param-text">טמפרטורת אוויר חוזר</span></div>
+                    <div class="tech-param"><span class="tech-param-code">03</span><span class="tech-param-text">טמפרטורת אמצע סוללה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">04</span><span class="tech-param-text">טמפרטורת כניסה לסוללה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">05</span><span class="tech-param-text">טמפרטורת סוף סוללה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">08</span><span class="tech-param-text">מצב פתיחת שסתום (טווח: 3–150)</span></div>
+                </div>
+            </div>
+
+            <!-- בדיקת פרמטרים מעבה -->
+            <div class="tech-section">
+                <div class="tech-section-header" onclick="toggleTechSection(this)">
+                    <span>🌡️ בדיקת פרמטרים — מעבה</span><span>▾</span>
+                </div>
+                <div class="tech-section-body">
+                    <div class="tech-sub-title">לחץ וטמפרטורה</div>
+                    <div class="tech-param"><span class="tech-param-code">1/1/2</span><span class="tech-param-text">לחץ גבוה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">1/2/2</span><span class="tech-param-text">לחץ נמוך</span></div>
+                    <div class="tech-param"><span class="tech-param-code">1/4/2</span><span class="tech-param-text">רגש דחיסה 1</span></div>
+                    <div class="tech-param"><span class="tech-param-code">1/5/2</span><span class="tech-param-text">רגש דחיסה 2</span></div>
+                    <div class="tech-param"><span class="tech-param-code">1/7/2</span><span class="tech-param-text">רגש יניקה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">1/9/2</span><span class="tech-param-text">רגש יניקה 3</span></div>
+                    <div class="tech-sub-title">עבודת מדחס</div>
+                    <div class="tech-param"><span class="tech-param-code">1/5/1</span><span class="tech-param-text">תדר עבודה נוכחי של המדחס</span></div>
+                    <div class="tech-sub-title">נתוני חוץ ושמן</div>
+                    <div class="tech-param"><span class="tech-param-code">1/16/2</span><span class="tech-param-text">רגש אוויר חוזר מעבה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">1/1-5/5</span><span class="tech-param-text">רגשי שמן TK1–TK5</span></div>
+                    <div class="tech-param"><span class="tech-param-code">1/16/1</span><span class="tech-param-text">בדיקת רמת שמן — 0=תקין, 1/2=רמה נמוכה</span></div>
+                    <div class="tech-sub-title">נתוני מערכת</div>
+                    <div class="tech-param"><span class="tech-param-code">1/4/3</span><span class="tech-param-text">כמות מאיידים במערכת (ניתן לבדוק גם ב-4/1/1)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">6/*/*</span><span class="tech-param-text">כוח סוס של המאיידים</span></div>
+                    <div class="tech-sub-title">בדיקות עבודה (Test Mode)</div>
+                    <div class="tech-param"><span class="tech-param-code">2/1/4</span><span class="tech-param-text">טסט מאווררי מעבה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">2/5/1</span><span class="tech-param-text">טסט קירור</span></div>
+                    <div class="tech-param"><span class="tech-param-code">2/6/1</span><span class="tech-param-text">טסט חימום</span></div>
+                    <div class="tech-sub-title">שסתומים</div>
+                    <div class="tech-param"><span class="tech-param-code">2/1/3</span><span class="tech-param-text">פתיחת שסתומי מעבה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">2/3/1</span><span class="tech-param-text">פתיחת שסתומי מאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">8/*/*</span><span class="tech-param-text">פתיחת שסתום במאיידים</span></div>
+                    <div class="tech-sub-title">חיישני מאיידים (מהמעבה)</div>
+                    <div class="tech-param"><span class="tech-param-code">9/*/*</span><span class="tech-param-text">אוויר חוזר מאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">10/*/*</span><span class="tech-param-text">רגש יציאת אוויר</span></div>
+                    <div class="tech-param"><span class="tech-param-code">11/*/*</span><span class="tech-param-text">אמצע סוללה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">12/*/*</span><span class="tech-param-text">סוף סוללה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">13/*/*</span><span class="tech-param-text">כניסה לסוללה</span></div>
+                    <div class="tech-note">⚠️ חלק מהנתונים לא תקפים למעבה דגם U</div>
+                    <div class="tech-note">💡 <strong>*</strong> = מעבר בין המאיידים באמצעות המפסקים הצהובים</div>
+                    <div class="tech-sub-title">דיאגנוסטיקה</div>
+                    <div class="tech-param"><span class="tech-param-code">1/1/16</span><span class="tech-param-text">בדיקת תקלה אחרונה — דורש לחיצה על SW04 למשך 5 שניות</span></div>
+                </div>
+            </div>
+
+            <!-- DN Code -->
+            <div class="tech-section">
+                <div class="tech-section-header" onclick="toggleTechSection(this)">
+                    <span>🛠️ שינוי DN CODE — הגדרות שירות</span><span>▾</span>
+                </div>
+                <div class="tech-section-body">
+                    <div class="tech-param"><span class="tech-param-code">01</span><span class="tech-param-text">זמן הגדרת ניקוי פילטר</span></div>
+                    <div class="tech-param"><span class="tech-param-code">03</span><span class="tech-param-text">כתובת בקר מרכזי</span></div>
+                    <div class="tech-param"><span class="tech-param-code">04</span><span class="tech-param-text">הגדרת מאייד כ-Master — <strong>רק לאחר שמגדירים במעבה</strong></span></div>
+                    <div class="tech-param"><span class="tech-param-code">06</span><span class="tech-param-text">שינוי רגש בחימום</span></div>
+                    <div class="tech-param"><span class="tech-param-code">10</span><span class="tech-param-text">הגדרת דגם המאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">11</span><span class="tech-param-text">הגדרת גודל (הספק) המאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">12</span><span class="tech-param-text">הגדרת קו גז מעבה</span></div>
+                    <div class="tech-param"><span class="tech-param-code">13</span><span class="tech-param-text">הגדרת כתובת מאייד</span></div>
+                    <div class="tech-param"><span class="tech-param-code">14</span><span class="tech-param-text">שליטת קבוצה — Group Control</span></div>
+                    <div class="tech-param"><span class="tech-param-code">17</span><span class="tech-param-text">שינוי רגש בקירור</span></div>
+                    <div class="tech-param"><span class="tech-param-code">28</span><span class="tech-param-text">חזרה מהפסקת חשמל — Auto Restart</span></div>
+                    <div class="tech-param"><span class="tech-param-code">32</span><span class="tech-param-text">מדידת טמפרטורה מהטרמוסטט — Remote Sensor</span></div>
+                    <div class="tech-param"><span class="tech-param-code">33</span><span class="tech-param-text">יחידות מידה — פרנהייט / צלזיוס</span></div>
+                    <div class="tech-param"><span class="tech-param-code">36</span><span class="tech-param-text">תצוגת הטמפרטורה שהמזגן מרגיש בפועל</span></div>
+                    <div class="tech-param"><span class="tech-param-code">5D</span><span class="tech-param-text">שינוי לחץ סטטי — External Static Pressure (לפי טבלה)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">103</span><span class="tech-param-text">הגדרה לדגמי U ללא טרמוסטט מחובר</span></div>
+                    <div class="tech-param"><span class="tech-param-code">A0</span><span class="tech-param-text">עבודת פן ומשאבת ניקוז בזמן החזרת שמן</span></div>
+                </div>
+            </div>
+
+        </div><!-- end tech-toshiba -->
+    </div><!-- end techPortal -->
+</div><!-- end page-tech -->
+
+<!-- ==============================
+     PAGE 4: ABOUT
 ================================= -->
 <div class="page" id="page-about">
     <div class="info-card">
-        <h3>🛠️ Tadiran VRF Tools</h3>
-        <p>כלי עזר מקצועיים לטכנאי VRF — מחשבון תוספת גז ומחשבון המרות לחץ וטמפרטורה.</p>
+        <h3 id="aboutTitle">🛠️ Tadiran VRF Tools</h3>
+        <p id="aboutDesc">כלי עזר מקצועיים לטכנאי VRF — מחשבון תוספת גז ומחשבון המרות לחץ וטמפרטורה.</p>
         <div class="version-badge">v2.0.0 · 2025</div>
     </div>
 
     <div class="info-card">
-        <h3>📱 כיצד להתקין כקיצור דרך?</h3>
-        <p><strong>iPhone/iPad:</strong> פתח ב-Safari ← לחץ שתף ← "הוסף למסך הבית"<br><br>
-           <strong>Android:</strong> פתח בכרום ← תפריט ⋮ ← "הוסף למסך הבית"</p>
+        <h3 id="aboutInstallTitle">📱 כיצד להתקין כקיצור דרך?</h3>
+        <p><strong>iPhone/iPad:</strong> <span id="aboutIphone">פתח ב-Safari ← לחץ שתף ← "הוסף למסך הבית"</span><br><br>
+           <strong>Android:</strong> <span id="aboutAndroid">פתח בכרום ← תפריט ⋮ ← "הוסף למסך הבית"</span></p>
     </div>
 
     <div class="info-card">
-        <h3>🌙 מצב לילה</h3>
-        <p>לחץ על כפתור הירח בפינה השמאלית העליונה למעבר בין מצב יום ולילה. ההגדרה נשמרת אוטומטית.</p>
+        <h3 id="aboutDarkTitle">🌙 מצב לילה</h3>
+        <p id="aboutDarkDesc">לחץ על כפתור הירח בפינה השמאלית העליונה למעבר בין מצב יום ולילה. ההגדרה נשמרת אוטומטית.</p>
     </div>
 </div>
 
 <script>
 // ===========================
-// DARK MODE
+// TRANSLATIONS
 // ===========================
+const TRANSLATIONS = {
+    he: {
+        tab_gas: '⚙️ תוספת גז', tab_conv: '🔄 המרות', tab_tech: '🔧 טכנאים', tab_about: 'ℹ️ אודות',
+        warning_title: 'הערות שימוש',
+        warning_text: 'נתוני תוספת הגז מבוססים על מפרטי היצרן. יש לאמת תמיד מול הוראות ההתקנה הרשמיות. החברה לא אחראית לטעויות שימוש.',
+        choose_brand: 'בחר מותג', sys_type: 'סוג מערכת', choose_model: 'בחר דגם',
+        pipe_label: 'אורך צנרת נוזל בלבד (מטרים)',
+        unit_count: 'כמות מאיידים', ratio: 'יחס העמסה (Ratio)',
+        result_label: 'תוספת גז סופית נדרשת', clear: '↺ נקה נתונים',
+        mini: 'MINI — מיני VRF', modular: 'MODULAR — מודולרי',
+        choose_ratio: '— בחר יחס —',
+        sat_title: 'R410A — לחץ ↔ טמפרטורת רוויה',
+        sat_sub: 'מלא לחץ או טמפרטורה — הכל יחושב אוטומטית',
+        sat_pressure: '🔵 לחץ רוויה', sat_temp: '🌡️ המרה לטמפרטורת רוויה',
+        clear_all: '↺ נקה הכל',
+        tech_title: 'אזור טכנאים', tech_subtitle: 'הזן סיסמה לגישה למידע טכני',
+        tech_login: 'כניסה', tech_error: 'סיסמה שגויה', tech_welcome: '👨‍🔧 שלום טכנאי',
+        tech_logout: 'יציאה', tech_choose_brand: 'בחר מותג',
+        about_title: 'Tadiran VRF Tools', about_desc: 'כלי עזר מקצועיים לטכנאי VRF — מחשבון תוספת גז ומחשבון המרות לחץ וטמפרטורה.',
+        about_install: 'כיצד להתקין כקיצור דרך?',
+        about_iphone: 'פתח ב-Safari ← לחץ שתף ← "הוסף למסך הבית"',
+        about_android: 'פתח בכרום ← תפריט ⋮ ← "הוסף למסך הבית"',
+        about_dark: 'מצב לילה', about_dark_desc: 'לחץ על כפתור הירח בפינה השמאלית העליונה למעבר בין מצב יום ולילה.',
+        dir: 'rtl'
+    },
+    en: {
+        tab_gas: '⚙️ Gas Charge', tab_conv: '🔄 Conversions', tab_tech: '🔧 Technicians', tab_about: 'ℹ️ About',
+        warning_title: 'Usage Notes',
+        warning_text: 'Gas charge data is based on manufacturer specifications. Always verify against official installation instructions. The company is not responsible for usage errors.',
+        choose_brand: 'Select Brand', sys_type: 'System Type', choose_model: 'Select Model',
+        pipe_label: 'Liquid line length only (meters)',
+        unit_count: 'Number of Indoor Units', ratio: 'Loading Ratio',
+        result_label: 'Required Gas Charge', clear: '↺ Clear',
+        mini: 'MINI — Mini VRF', modular: 'MODULAR — Modular',
+        choose_ratio: '— Select ratio —',
+        sat_title: 'R410A — Pressure ↔ Saturation Temp',
+        sat_sub: 'Enter pressure or temperature — all fields update automatically',
+        sat_pressure: '🔵 Saturation Pressure', sat_temp: '🌡️ Saturation Temperature',
+        clear_all: '↺ Clear All',
+        tech_title: 'Technician Portal', tech_subtitle: 'Enter password to access technical data',
+        tech_login: 'Login', tech_error: 'Incorrect password', tech_welcome: '👨‍🔧 Welcome, Technician',
+        tech_logout: 'Logout', tech_choose_brand: 'Select Brand',
+        about_title: 'Tadiran VRF Tools', about_desc: 'Professional tools for VRF technicians — gas charge calculator and pressure/temperature converter.',
+        about_install: 'How to install as a shortcut?',
+        about_iphone: 'Open in Safari ← Share ← "Add to Home Screen"',
+        about_android: 'Open in Chrome ← Menu ⋮ ← "Add to Home Screen"',
+        about_dark: 'Dark Mode', about_dark_desc: 'Press the moon button in the top left corner to toggle dark mode.',
+        dir: 'ltr'
+    },
+    ar: {
+        tab_gas: '⚙️ شحن الغاز', tab_conv: '🔄 تحويلات', tab_tech: '🔧 الفنيون', tab_about: 'ℹ️ حول',
+        warning_title: 'ملاحظات الاستخدام',
+        warning_text: 'بيانات شحن الغاز مستندة إلى مواصفات الشركة المصنعة. يجب دائمًا التحقق من تعليمات التركيب الرسمية. الشركة غير مسؤولة عن أخطاء الاستخدام.',
+        choose_brand: 'اختر العلامة التجارية', sys_type: 'نوع النظام', choose_model: 'اختر الطراز',
+        pipe_label: 'طول أنبوب السائل فقط (بالأمتار)',
+        unit_count: 'عدد الوحدات الداخلية', ratio: 'نسبة التحميل',
+        result_label: 'كمية الغاز المطلوبة', clear: '↺ مسح',
+        mini: 'MINI — ميني VRF', modular: 'MODULAR — موديولار',
+        choose_ratio: '— اختر النسبة —',
+        sat_title: 'R410A — الضغط ↔ درجة حرارة التشبع',
+        sat_sub: 'أدخل الضغط أو درجة الحرارة — يتم التحديث تلقائيًا',
+        sat_pressure: '🔵 ضغط التشبع', sat_temp: '🌡️ درجة حرارة التشبع',
+        clear_all: '↺ مسح الكل',
+        tech_title: 'منطقة الفنيين', tech_subtitle: 'أدخل كلمة المرور للوصول إلى البيانات التقنية',
+        tech_login: 'دخول', tech_error: 'كلمة مرور غير صحيحة', tech_welcome: '👨‍🔧 مرحبًا أيها الفني',
+        tech_logout: 'خروج', tech_choose_brand: 'اختر العلامة التجارية',
+        about_title: 'Tadiran VRF Tools', about_desc: 'أدوات احترافية لفنيي VRF — حاسبة شحن الغاز ومحول الضغط والحرارة.',
+        about_install: 'كيفية التثبيت كاختصار؟',
+        about_iphone: 'افتح في Safari ← مشاركة ← "إضافة إلى الشاشة الرئيسية"',
+        about_android: 'افتح في Chrome ← القائمة ⋮ ← "إضافة إلى الشاشة الرئيسية"',
+        about_dark: 'الوضع الليلي', about_dark_desc: 'اضغط على زر القمر في الزاوية اليسرى العليا للتبديل بين وضعي النهار والليل.',
+        dir: 'rtl'
+    }
+};
+
+let currentLang = localStorage.getItem('vrf-lang') || 'he';
+
+function setLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('vrf-lang', lang);
+    const t = TRANSLATIONS[lang];
+    document.documentElement.setAttribute('dir', t.dir);
+
+    // lang buttons
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    const map = {he:0,en:1,ar:2};
+    document.querySelectorAll('.lang-btn')[map[lang]]?.classList.add('active');
+
+    // tabs
+    const tabKeys = ['gas','conv','tech','about'];
+    document.querySelectorAll('[data-i18n-tab]').forEach(btn => {
+        const key = btn.getAttribute('data-i18n-tab');
+        btn.textContent = t['tab_' + key] || btn.textContent;
+    });
+
+    // all data-i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) el.textContent = t[key];
+    });
+
+    // dynamic UI labels
+    const ids = {
+        'warningTitle': 'warning_title', 'warningText': 'warning_text',
+    };
+
+    // Warning box
+    const warnTitle = document.querySelector('#page-gas strong[data-i18n]');
+    const warnPara  = document.querySelector('#page-gas p[data-i18n]');
+
+    // Section labels — update key static labels
+    updateLabel('sectionBrand', t.choose_brand);
+    updateLabel('sectionSysType', t.sys_type);
+    updateLabel('modelLabel', t.choose_model);
+    updateLabel('pipeSectionLabel', t.pipe_label);
+    updateLabel('unitCountLabel', t.unit_count);
+    updateLabel('ratioLabel', t.ratio);
+    updateLabel('resultLabel', t.result_label);
+
+    // Select options
+    const sysType = document.getElementById('sysType');
+    if (sysType) {
+        sysType.options[0].text = t.mini;
+        sysType.options[1].text = t.modular;
+    }
+    const ratio = document.getElementById('ratio');
+    if (ratio && ratio.options[0]) ratio.options[0].text = t.choose_ratio;
+
+    // Buttons
+    const clearBtn = document.querySelector('.btn-clear');
+    if (clearBtn) clearBtn.textContent = t.clear;
+
+    // Saturation table labels
+    updateLabel('satTitle', t.sat_title);
+    updateLabel('satSub', t.sat_sub);
+    updateLabel('satPressureDiv', t.sat_pressure);
+    updateLabel('satTempDiv', t.sat_temp);
+
+    // About page
+    updateLabel('aboutTitle', t.about_title);
+    updateLabel('aboutDesc', t.about_desc);
+    updateLabel('aboutInstallTitle', t.about_install);
+    updateLabel('aboutIphone', t.about_iphone);
+    updateLabel('aboutAndroid', t.about_android);
+    updateLabel('aboutDarkTitle', t.about_dark);
+    updateLabel('aboutDarkDesc', t.about_dark_desc);
+}
+
+function updateLabel(id, text) {
+    if (!text) return;
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
+// Apply saved language on load
+window.addEventListener('DOMContentLoaded', () => setLang(currentLang));
+
+// ===========================
+// TECHNICIAN PORTAL
+// ===========================
+const TECH_PASSWORD = 'Tadiran2026';
+
+function techLogin() {
+    const pw = document.getElementById('techPassword').value;
+    if (pw === TECH_PASSWORD) {
+        localStorage.setItem('vrf-tech-auth', '1');
+        showTechPortal();
+    } else {
+        document.getElementById('techError').style.display = 'block';
+        document.getElementById('techPassword').value = '';
+    }
+}
+
+function techLogout() {
+    localStorage.removeItem('vrf-tech-auth');
+    document.getElementById('techPortal').classList.add('hidden');
+    document.getElementById('techLock').style.display = 'block';
+    document.getElementById('techPassword').value = '';
+    document.getElementById('techError').style.display = 'none';
+}
+
+function showTechPortal() {
+    document.getElementById('techLock').style.display = 'none';
+    document.getElementById('techPortal').classList.remove('hidden');
+}
+
+// Check on tab switch
+function checkTechAuth() {
+    if (localStorage.getItem('vrf-tech-auth') === '1') showTechPortal();
+    else {
+        document.getElementById('techLock').style.display = 'block';
+        document.getElementById('techPortal').classList.add('hidden');
+    }
+}
+
+let currentTechBrand = '';
+function selectTechBrand(brand, el) {
+    currentTechBrand = brand;
+    document.querySelectorAll('.tech-brand-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    ['tech-gree','tech-prime','tech-toshiba'].forEach(id => document.getElementById(id).classList.add('hidden'));
+    document.getElementById('tech-' + brand.toLowerCase()).classList.remove('hidden');
+}
+
+function toggleTechSection(header) {
+    const body = header.nextElementSibling;
+    const arrow = header.querySelector('span:last-child');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arrow.textContent = isOpen ? '▾' : '▴';
+}
 const savedTheme = localStorage.getItem('vrf-theme') || 'light';
 if (savedTheme === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -898,6 +1534,7 @@ function switchTab(id, btn) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('page-' + id).classList.add('active');
     btn.classList.add('active');
+    if (id === 'tech') checkTechAuth();
 }
 
 // ===========================
