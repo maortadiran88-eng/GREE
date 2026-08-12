@@ -986,6 +986,14 @@
                 </div>
             </div>
 
+            <div class="urow" data-key="bar">
+                <div class="urow-brand neutral-brand">—</div>
+                <div class="urow-unit">BAR</div>
+                <div class="urow-input-wrap">
+                    <input type="number" class="uinput" id="u-bar" inputmode="decimal" placeholder="—" oninput="satConvert('bar')">
+                </div>
+            </div>
+
             <div class="utab-divider" id="satTempDiv">🌡️ המרה לטמפרטורת רוויה</div>
 
             <div class="urow" data-key="tc">
@@ -1059,6 +1067,7 @@
                     <div class="tech-param"><span class="tech-param-code">P13</span><span class="tech-param-text">2 טרמוסטטים לאותו מאייד — 01 = Master, 02 = Slave</span></div>
                     <div class="tech-param"><span class="tech-param-code">P14</span><span class="tech-param-text">מספר מאיידים המחוברים לטרמוסטט אחד (00–16)</span></div>
                     <div class="tech-param"><span class="tech-param-code">P15</span><span class="tech-param-text">הגדרת זיכרון חזרת חשמל (Auto Restart)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">P16</span><span class="tech-param-text">מעבר בין יחידות מידה — צלזיוס / פרנהייט</span></div>
                     <div class="tech-param"><span class="tech-param-code">P20</span><span class="tech-param-text">מיקום רגש אוויר חוזר (ערכים 01–04)</span></div>
                     <div class="tech-param"><span class="tech-param-code">P21</span><span class="tech-param-text">כיול רגש אוויר חוזר — <strong>קירור</strong> (טווח: −15 עד +15)</span></div>
                     <div class="tech-param"><span class="tech-param-code">P22</span><span class="tech-param-text">כיול רגש אוויר חוזר — <strong>חימום</strong> (טווח: −15 עד +15)</span></div>
@@ -1105,6 +1114,8 @@
                     <div class="tech-param"><span class="tech-param-code">C9</span><span class="tech-param-text">ביטול מנוע מעבה — 00 = לא מבוטל. <strong>ניתן לבטל רק כאשר יש מודול בודד</strong></span></div>
                     <div class="tech-param"><span class="tech-param-code">CA</span><span class="tech-param-text">ביטול מעבה — 00 = לא מבוטל</span></div>
                     <div class="tech-param"><span class="tech-param-code">1G</span><span class="tech-param-text">הגדלת לחץ סטטי במעבה (01–04)</span></div>
+                    <div class="tech-param"><span class="tech-param-code">NL</span><span class="tech-param-text">הגדרת יעד טמפרטורה בלחץ הנמוך</span></div>
+                    <div class="tech-param"><span class="tech-param-code">NH</span><span class="tech-param-text">הגדרת יעד טמפרטורה בלחץ הגבוה</span></div>
                 </div>
             </div>
         </div>
@@ -1172,6 +1183,74 @@
                     <div class="tech-param">
                         <span class="tech-param-code">🔔🔔🔔🔔</span>
                         <span class="tech-param-text"><strong>4 צפצופים</strong> — Auto Restart <strong>פעיל</strong> (ידלק בחזרת חשמל)</span>
+                    </div>
+
+                    <div style="height:16px;"></div>
+
+                    <!-- צפייה באוויר חוזר -->
+                    <div class="tech-sub-title">3. צפייה באוויר חוזר במאייד עילי</div>
+                    <div class="tech-note">על מנת לראות את האוויר חוזר במאייד עילי יש ללחוץ <strong>10 פעמים</strong> על כפתור <strong>LIGHT</strong></div>
+
+                    <div style="height:16px;"></div>
+
+                    <!-- זיוף רגש אוויר חוזר בחימום -->
+                    <div class="tech-sub-title">4. זיוף רגש אוויר חוזר בחימום — מאייד עילי</div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
+                            <span style="font-size:14px;color:var(--text);">הדלק במצב <strong>חימום</strong> על <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">30 מעלות</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
+                            <span style="font-size:14px;color:var(--text);">לחץ על כפתור <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">SLEEP</strong> — <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">7 פעמים</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
+                            <span style="font-size:14px;color:var(--text);">המזגן <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">יצפצף</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</span>
+                            <span style="font-size:14px;color:var(--text);">הורד טמפרטורה ואשר <strong>בכיבוי</strong> המזגן</span>
+                        </div>
+                    </div>
+                    <div class="tech-note" style="margin-top:8px;">💡 כל <strong>מעלה</strong> שמורידים = <strong>מעלה</strong> זיוף. לדוגמה: הורדה של 2 מעלות = זיוף של 2 מעלות</div>
+
+                    <div style="height:16px;"></div>
+
+                    <!-- זיוף רגש אוויר חוזר בקירור -->
+                    <div class="tech-sub-title">5. זיוף רגש אוויר חוזר בקירור — מאייד עילי</div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>
+                            <span style="font-size:14px;color:var(--text);">הדלק במצב <strong>קירור</strong> על <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">23 מעלות</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>
+                            <span style="font-size:14px;color:var(--text);">לחץ על כפתור <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">SLEEP</strong> — <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">7 פעמים</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>
+                            <span style="font-size:14px;color:var(--text);">המזגן <strong style="background:rgba(255,193,7,0.3);padding:1px 4px;border-radius:3px;">יצפצף</strong></span>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+                            <span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</span>
+                            <span style="font-size:14px;color:var(--text);">הורד או העלה טמפרטורה ואשר <strong>בכיבוי</strong> המזגן</span>
+                        </div>
+                    </div>
+
+                    <div style="height:16px;"></div>
+
+                    <!-- משאבת מים מדגם 7G -->
+                    <div class="tech-sub-title">6. משאבת מים מובנית — מאייד עילי מדגם 7G</div>
+                    <div class="tech-note">מאייד עילי מדגם <strong>7G</strong> מגיע עם משאבת מים מובנית. להפעלה יש ללחוץ <strong>6 פעמים</strong> על כפתור <strong>HEALTH</strong></div>
+                    <div style="height:8px;"></div>
+                    <div class="tech-param">
+                        <span class="tech-param-code">🔔🔔🔔🔔</span>
+                        <span class="tech-param-text"><strong>4 צפצופים</strong> — המשאבה <strong>עובדת</strong></span>
+                    </div>
+                    <div class="tech-param">
+                        <span class="tech-param-code">🔔🔔</span>
+                        <span class="tech-param-text"><strong>2 צפצופים</strong> — המשאבה <strong>כבויה</strong></span>
                     </div>
 
                 </div>
@@ -1817,7 +1896,7 @@ function satConvert(source) {
     const status = document.getElementById('satStatus');
 
     if (rawVal === '' || isNaN(val)) {
-        ['mpa','kpa','psi','tc','tf'].forEach(k => {
+        ['mpa','kpa','psi','bar','tc','tf'].forEach(k => {
             if (k !== source) document.getElementById('u-'+k).value = '';
         });
         status.textContent = '';
@@ -1828,7 +1907,7 @@ function satConvert(source) {
     let mpa = null;
     let tc  = null;
 
-    const pressureKeys = ['mpa','kpa','psi'];
+    const pressureKeys = ['mpa','kpa','psi','bar'];
     const tempKeys     = ['tc','tf'];
 
     if (pressureKeys.includes(source)) {
@@ -1836,6 +1915,7 @@ function satConvert(source) {
         if (source === 'mpa') mpa = val;
         else if (source === 'kpa') mpa = val * 0.001;
         else if (source === 'psi') mpa = val * 0.00689476;
+        else if (source === 'bar') mpa = val * 0.1;
 
         if (mpa < 0.02 || mpa > 5.5) {
             status.textContent = '⚠️ הלחץ מחוץ לטווח R410A (-60°C עד 70°C)';
@@ -1849,6 +1929,7 @@ function satConvert(source) {
         if (source !== 'mpa') document.getElementById('u-mpa').value = mpa.toFixed(4);
         if (source !== 'kpa') document.getElementById('u-kpa').value = (mpa / 0.001).toFixed(1);
         if (source !== 'psi') document.getElementById('u-psi').value = (mpa / 0.00689476).toFixed(2);
+        if (source !== 'bar') document.getElementById('u-bar').value = (mpa / 0.1).toFixed(3);
 
         // מלא טמפרטורות
         document.getElementById('u-tc').value = tc.toFixed(2);
@@ -1877,6 +1958,7 @@ function satConvert(source) {
         document.getElementById('u-mpa').value = mpa.toFixed(4);
         document.getElementById('u-kpa').value = (mpa / 0.001).toFixed(1);
         document.getElementById('u-psi').value = (mpa / 0.00689476).toFixed(2);
+        document.getElementById('u-bar').value = (mpa / 0.1).toFixed(3);
 
         status.textContent = `✅ Psat = ${mpa.toFixed(3)} MPa בטמפרטורה ${tc.toFixed(1)}°C`;
     }
@@ -1886,7 +1968,7 @@ function satConvert(source) {
 
 function clearSat() {
     _satBusy = true;
-    ['mpa','kpa','psi','tc','tf'].forEach(k => document.getElementById('u-'+k).value = '');
+    ['mpa','kpa','psi','bar','tc','tf'].forEach(k => document.getElementById('u-'+k).value = '');
     document.querySelectorAll('.urow').forEach(r => r.classList.remove('active-row'));
     document.getElementById('satStatus').textContent = '';
     _satBusy = false;
