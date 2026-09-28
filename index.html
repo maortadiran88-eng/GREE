@@ -737,6 +737,7 @@
     <button class="tab-btn active" onclick="switchTab('gas', this)" data-i18n-tab="gas">⚙️ תוספת גז</button>
     <button class="tab-btn" onclick="switchTab('conv', this)" data-i18n-tab="conv">🔄 המרות</button>
     <button class="tab-btn" onclick="switchTab('tech', this)" data-i18n-tab="tech">🔧 טכנאים</button>
+    <button class="tab-btn" onclick="switchTab('videos', this)" data-i18n-tab="videos">🎥 סרטוני הדרכה</button>
     <button class="tab-btn" onclick="switchTab('about', this)" data-i18n-tab="about">ℹ️ אודות</button>
 </div>
 
@@ -1350,6 +1351,45 @@
 </div><!-- end page-tech -->
 
 <!-- ==============================
+     PAGE: VIDEO TUTORIALS
+================================= -->
+<div class="page" id="page-videos">
+
+    <!-- LOCK SCREEN -->
+    <div id="videosLock">
+        <div class="tech-lock">
+            <div class="lock-icon">🔐</div>
+            <h2 data-i18n="videos_lock_title">סרטוני הדרכה</h2>
+            <p data-i18n="videos_lock_subtitle">הזן סיסמה לגישה לסרטוני ההדרכה</p>
+            <input type="password" id="videosPassword" placeholder="••••••••••" onkeydown="if(event.key==='Enter')videosLoginFn()">
+            <button class="btn-login" onclick="videosLoginFn()" data-i18n="tech_login">כניסה</button>
+            <div id="videosError" style="margin-top:10px;font-size:12px;color:var(--red);display:none;" data-i18n="tech_error">סיסמה שגויה</div>
+        </div>
+    </div>
+
+    <!-- PORTAL CONTENT -->
+    <div id="videosPortal" class="hidden">
+        <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:16px;">
+            <button class="btn-logout" onclick="videosLogout()" data-i18n="tech_logout">יציאה</button>
+        </div>
+
+        <div class="conv-card">
+            <div class="conv-card-title"><span>🎥</span> <span id="videosTitle">סרטוני הדרכה</span></div>
+            <p id="videosSub" style="font-size:12px; color:var(--text3); margin-bottom:16px; line-height:1.6;">
+                בחר מותג לצפייה בפלייליסט סרטוני ההדרכה
+            </p>
+
+            <div class="brand-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="brand-card" onclick="openVideoPlaylist('gree')">GREE</div>
+                <div class="brand-card" onclick="openVideoPlaylist('remote')" id="videoRemoteCard">שליטה מרחוק</div>
+                <div class="brand-card" onclick="openVideoPlaylist('toshiba')">TOSHIBA</div>
+                <div class="brand-card" onclick="openVideoPlaylist('prime')">PRIME</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================
      PAGE 4: ABOUT
 ================================= -->
 <div class="page" id="page-about">
@@ -1377,7 +1417,7 @@
 // ===========================
 const TRANSLATIONS = {
     he: {
-        tab_gas: '⚙️ תוספת גז', tab_conv: '🔄 המרות', tab_tech: '🔧 טכנאים', tab_about: 'ℹ️ אודות',
+        tab_gas: '⚙️ תוספת גז', tab_conv: '🔄 המרות', tab_tech: '🔧 טכנאים', tab_videos: '🎥 סרטוני הדרכה', tab_about: 'ℹ️ אודות',
         warning_title: 'הערות שימוש',
         warning_text: 'נתוני תוספת הגז מבוססים על מפרטי היצרן. יש לאמת תמיד מול הוראות ההתקנה הרשמיות. החברה לא אחראית לטעויות שימוש.',
         choose_brand: 'בחר מותג', sys_type: 'סוג מערכת', choose_model: 'בחר דגם',
@@ -1390,6 +1430,8 @@ const TRANSLATIONS = {
         sat_sub: 'מלא לחץ או טמפרטורה — הכל יחושב אוטומטית',
         sat_pressure: '🔵 לחץ רוויה', sat_temp: '🌡️ המרה לטמפרטורת רוויה',
         clear_all: '↺ נקה הכל',
+        videos_title: 'סרטוני הדרכה', videos_sub: 'בחר מותג לצפייה בפלייליסט סרטוני ההדרכה', videos_remote: 'שליטה מרחוק',
+        videos_lock_title: 'סרטוני הדרכה', videos_lock_subtitle: 'הזן סיסמה לגישה לסרטוני ההדרכה',
         tech_title: 'אזור טכנאים', tech_subtitle: 'הזן סיסמה לגישה למידע טכני',
         tech_login: 'כניסה', tech_error: 'סיסמה שגויה', tech_welcome: '👨‍🔧 שלום טכנאי',
         tech_logout: 'יציאה', tech_choose_brand: 'בחר מותג',
@@ -1401,7 +1443,7 @@ const TRANSLATIONS = {
         dir: 'rtl'
     },
     en: {
-        tab_gas: '⚙️ Gas Charge', tab_conv: '🔄 Conversions', tab_tech: '🔧 Technicians', tab_about: 'ℹ️ About',
+        tab_gas: '⚙️ Gas Charge', tab_conv: '🔄 Conversions', tab_tech: '🔧 Technicians', tab_videos: '🎥 Video Tutorials', tab_about: 'ℹ️ About',
         warning_title: 'Usage Notes',
         warning_text: 'Gas charge data is based on manufacturer specifications. Always verify against official installation instructions. The company is not responsible for usage errors.',
         choose_brand: 'Select Brand', sys_type: 'System Type', choose_model: 'Select Model',
@@ -1414,6 +1456,8 @@ const TRANSLATIONS = {
         sat_sub: 'Enter pressure or temperature — all fields update automatically',
         sat_pressure: '🔵 Saturation Pressure', sat_temp: '🌡️ Saturation Temperature',
         clear_all: '↺ Clear All',
+        videos_title: 'Video Tutorials', videos_sub: 'Select a brand to view its tutorial playlist', videos_remote: 'Remote Control',
+        videos_lock_title: 'Video Tutorials', videos_lock_subtitle: 'Enter password to access the tutorial videos',
         tech_title: 'Technician Portal', tech_subtitle: 'Enter password to access technical data',
         tech_login: 'Login', tech_error: 'Incorrect password', tech_welcome: '👨‍🔧 Welcome, Technician',
         tech_logout: 'Logout', tech_choose_brand: 'Select Brand',
@@ -1425,7 +1469,7 @@ const TRANSLATIONS = {
         dir: 'ltr'
     },
     ar: {
-        tab_gas: '⚙️ شحن الغاز', tab_conv: '🔄 تحويلات', tab_tech: '🔧 الفنيون', tab_about: 'ℹ️ حول',
+        tab_gas: '⚙️ شحن الغاز', tab_conv: '🔄 تحويلات', tab_tech: '🔧 الفنيون', tab_videos: '🎥 فيديوهات تعليمية', tab_about: 'ℹ️ حول',
         warning_title: 'ملاحظات الاستخدام',
         warning_text: 'بيانات شحن الغاز مستندة إلى مواصفات الشركة المصنعة. يجب دائمًا التحقق من تعليمات التركيب الرسمية. الشركة غير مسؤولة عن أخطاء الاستخدام.',
         choose_brand: 'اختر العلامة التجارية', sys_type: 'نوع النظام', choose_model: 'اختر الطراز',
@@ -1438,6 +1482,8 @@ const TRANSLATIONS = {
         sat_sub: 'أدخل الضغط أو درجة الحرارة — يتم التحديث تلقائيًا',
         sat_pressure: '🔵 ضغط التشبع', sat_temp: '🌡️ درجة حرارة التشبع',
         clear_all: '↺ مسح الكل',
+        videos_title: 'فيديوهات تعليمية', videos_sub: 'اختر العلامة التجارية لمشاهدة قائمة الفيديوهات', videos_remote: 'التحكم عن بعد',
+        videos_lock_title: 'فيديوهات تعليمية', videos_lock_subtitle: 'أدخل كلمة المرور للوصول إلى الفيديوهات التعليمية',
         tech_title: 'منطقة الفنيين', tech_subtitle: 'أدخل كلمة المرور للوصول إلى البيانات التقنية',
         tech_login: 'دخول', tech_error: 'كلمة مرور غير صحيحة', tech_welcome: '👨‍🔧 مرحبًا أيها الفني',
         tech_logout: 'خروج', tech_choose_brand: 'اختر العلامة التجارية',
@@ -1464,7 +1510,7 @@ function setLang(lang) {
     document.querySelectorAll('.lang-btn')[map[lang]]?.classList.add('active');
 
     // tabs
-    const tabKeys = ['gas','conv','tech','about'];
+    const tabKeys = ['gas','conv','tech','videos','about'];
     document.querySelectorAll('[data-i18n-tab]').forEach(btn => {
         const key = btn.getAttribute('data-i18n-tab');
         btn.textContent = t['tab_' + key] || btn.textContent;
@@ -1512,6 +1558,11 @@ function setLang(lang) {
     updateLabel('satSub', t.sat_sub);
     updateLabel('satPressureDiv', t.sat_pressure);
     updateLabel('satTempDiv', t.sat_temp);
+
+    // Video tutorials page
+    updateLabel('videosTitle', t.videos_title);
+    updateLabel('videosSub', t.videos_sub);
+    updateLabel('videoRemoteCard', t.videos_remote);
 
     // About page
     updateLabel('aboutTitle', t.about_title);
@@ -1570,6 +1621,49 @@ function checkTechAuth() {
     }
 }
 
+// ===========================
+// VIDEO TUTORIALS — LOCK
+// ===========================
+function getVideosPassword() {
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    return dd + mm;
+}
+
+function videosLoginFn() {
+    const pw = document.getElementById('videosPassword').value;
+    const today = getVideosPassword();
+    if (pw === today) {
+        localStorage.setItem('vrf-videos-auth-date', today);
+        showVideosPortal();
+    } else {
+        document.getElementById('videosError').style.display = 'block';
+        document.getElementById('videosPassword').value = '';
+    }
+}
+
+function videosLogout() {
+    localStorage.removeItem('vrf-videos-auth-date');
+    document.getElementById('videosPortal').classList.add('hidden');
+    document.getElementById('videosLock').style.display = 'block';
+    document.getElementById('videosPassword').value = '';
+    document.getElementById('videosError').style.display = 'none';
+}
+
+function showVideosPortal() {
+    document.getElementById('videosLock').style.display = 'none';
+    document.getElementById('videosPortal').classList.remove('hidden');
+}
+
+function checkVideosAuth() {
+    if (localStorage.getItem('vrf-videos-auth-date') === getVideosPassword()) showVideosPortal();
+    else {
+        document.getElementById('videosLock').style.display = 'block';
+        document.getElementById('videosPortal').classList.add('hidden');
+    }
+}
+
 let currentTechBrand = '';
 function selectTechBrand(brand, el) {
     currentTechBrand = brand;
@@ -1614,6 +1708,22 @@ function switchTab(id, btn) {
     document.getElementById('page-' + id).classList.add('active');
     btn.classList.add('active');
     if (id === 'tech') checkTechAuth();
+    if (id === 'videos') checkVideosAuth();
+}
+
+// ===========================
+// VIDEO TUTORIALS
+// ===========================
+const videoPlaylists = {
+    gree:    'https://youtube.com/playlist?list=PLGgbMH8Jkwx8&si=dT2czsFcQzvmH32S',
+    remote:  'https://youtube.com/playlist?list=PLGxAskMKig-4&si=iy0zMWy8l-EsE-_U',
+    toshiba: 'https://youtube.com/playlist?list=PLf0SoTR7GNgI&si=vbNXdg077jIKs018',
+    prime:   'https://youtube.com/playlist?list=PLcaQAGucEk50&si=jGMND-No53AigtQu'
+};
+
+function openVideoPlaylist(brand) {
+    const url = videoPlaylists[brand];
+    if (url) window.open(url, '_blank', 'noopener');
 }
 
 // ===========================
