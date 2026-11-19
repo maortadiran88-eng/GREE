@@ -770,6 +770,7 @@
             <select id="sysType" onchange="initModels()">
                 <option value="MINI">MINI — מיני VRF</option>
                 <option value="MODULAR">MODULAR — מודולרי</option>
+                <option value="GMV6_HR">GMV6 - HEAT RECOVERY</option>
             </select>
         </div>
 
@@ -795,7 +796,7 @@
         <div id="extraFields" class="hidden extra-section" style="margin-top:14px;">
             <div class="input-wrap" id="unitCountWrapper">
                 <div class="section-label" id="unitCountLabel">כמות מאיידים</div>
-                <input type="number" id="unitCount" placeholder="0" inputmode="numeric" oninput="calculate()">
+                <input type="number" id="unitCount" min="0" step="1" placeholder="0" inputmode="numeric" oninput="calculate()">
             </div>
             <div id="ratioWrapper">
                 <div class="section-label" id="ratioLabel">יחס העמסה (Ratio)</div>
@@ -938,6 +939,8 @@
             </div>
         </div>
 
+        <!-- GMV6 HR calculation summary -->
+        <div id="gmv6HrSummary" class="hidden" style="margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;"></div>
         <!-- RESULT -->
         <div class="result-box" id="resultBox" style="background: var(--blue);">
             <div class="result-label" id="resultLabel">תוספת גז סופית נדרשת</div>
@@ -1432,7 +1435,7 @@ const TRANSLATIONS = {
         pipe_label: 'אורך צנרת נוזל בלבד (מטרים)',
         unit_count: 'כמות מאיידים', ratio: 'יחס העמסה (Ratio)',
         result_label: 'תוספת גז סופית נדרשת', clear: '↺ נקה נתונים',
-        mini: 'MINI — מיני VRF', modular: 'MODULAR — מודולרי',
+        mini: 'MINI — מיני VRF', modular: 'MODULAR — מודולרי', gmv6_hr: 'GMV6 - HEAT RECOVERY',
         choose_ratio: '— בחר יחס —',
         sat_title: 'R410A — לחץ ↔ טמפרטורת רוויה',
         sat_sub: 'מלא לחץ או טמפרטורה — הכל יחושב אוטומטית',
@@ -1460,7 +1463,7 @@ const TRANSLATIONS = {
         pipe_label: 'Liquid line length only (meters)',
         unit_count: 'Number of Indoor Units', ratio: 'Loading Ratio',
         result_label: 'Required Gas Charge', clear: '↺ Clear',
-        mini: 'MINI — Mini VRF', modular: 'MODULAR — Modular',
+        mini: 'MINI — Mini VRF', modular: 'MODULAR — Modular', gmv6_hr: 'GMV6 - HEAT RECOVERY',
         choose_ratio: '— Select ratio —',
         sat_title: 'R410A — Pressure ↔ Saturation Temp',
         sat_sub: 'Enter pressure or temperature — all fields update automatically',
@@ -1488,7 +1491,7 @@ const TRANSLATIONS = {
         pipe_label: 'طول أنبوب السائل فقط (بالأمتار)',
         unit_count: 'عدد الوحدات الداخلية', ratio: 'نسبة التحميل',
         result_label: 'كمية الغاز المطلوبة', clear: '↺ مسح',
-        mini: 'MINI — ميني VRF', modular: 'MODULAR — موديولار',
+        mini: 'MINI — ميني VRF', modular: 'MODULAR — موديולار', gmv6_hr: 'GMV6 - HEAT RECOVERY',
         choose_ratio: '— اختر النسبة —',
         sat_title: 'R410A — الضغط ↔ درجة حرارة التشبع',
         sat_sub: 'أدخل الضغط أو درجة الحرارة — يتم التحديث تلقائيًا',
@@ -1558,7 +1561,8 @@ function setLang(lang) {
     const sysType = document.getElementById('sysType');
     if (sysType) {
         sysType.options[0].text = t.mini;
-        sysType.options[1].text = t.modular;
+            sysType.options[1].text = t.modular;
+            if (sysType.options[2]) sysType.options[2].text = t.gmv6_hr;
     }
     const ratio = document.getElementById('ratio');
     if (ratio && ratio.options[0]) ratio.options[0].text = t.choose_ratio;
@@ -1802,7 +1806,7 @@ function initModels() {
     const label = document.getElementById('modelLabel');
     list.innerHTML = '';
 
-    const count = (currentBrand === 'GREE' && type === 'MODULAR') ? 4 : 1;
+    const count = (currentBrand === 'GREE' && (type === 'MODULAR' || type === 'GMV6_HR')) ? 4 : 1;
     label.innerText = count > 1 ? 'בחר עד 4 מעבים:' : 'בחר דגם:';
 
     for (let i = 1; i <= count; i++) {
@@ -1827,16 +1831,25 @@ function initModels() {
                 ? ['PRIME 032','PRIME 04','PRIME 05','PRIME 06','PRIME 07','PRIME 08','PRIME 10','PRIME 12']
                 : ['MODULAR 08','MODULAR 10','MODULAR 12','MODULAR 14','MODULAR 16','MODULAR 18','MODULAR 20','MODULAR 22','MODULAR 24','MODULAR 26'];
         } else {
-            models = type === 'MINI'
-                ? ['80','100','120','140','160','224','280','335']
-                : Object.keys(greeFullData);
+            if (type === 'MINI') {
+                models = ['80','100','120','140','160','224','280','335'];
+            } else if (type === 'GMV6_HR') {
+                models = ['224','280','335','400','450','504','560','615'];
+            } else {
+                models = Object.keys(greeFullData);
+            }
         }
 
         models.forEach(m => {
             const o = document.createElement('option');
             o.value = m;
-            // GREE — הצג עם קידומת GMV-
-            o.innerText = (currentBrand === 'GREE') ? 'GMV-' + m : m;
+            // GMV6 Heat Recovery — display manufacturer module capacity in kW
+            if (currentBrand === 'GREE' && type === 'GMV6_HR') {
+                const kw = {224:'22.4',280:'28.0',335:'33.5',400:'40.0',450:'45.0',504:'50.4',560:'56.0',615:'61.5'}[m];
+                o.innerText = `GMV6 HR ${kw} kW (GMV-${m})`;
+            } else {
+                o.innerText = (currentBrand === 'GREE') ? 'GMV-' + m : m;
+            }
             sel.appendChild(o);
         });
         list.appendChild(sel);
@@ -1870,6 +1883,14 @@ function toggleUI() {
         if (currentBrand !== 'PRIME') document.getElementById('row10').classList.remove('hidden');
         if (currentBrand === 'GREE')  document.getElementById('row118').classList.remove('hidden');
     }
+
+    const isGMV6HR = (currentBrand === 'GREE' && type === 'GMV6_HR');
+    const pipeLabel = document.getElementById('pipeSectionLabel');
+    if (pipeLabel) pipeLabel.innerText = isGMV6HR ? 'אורך צנרת נוזל לפי קוטר (מטרים) — חישוב kg/m' : TRANSLATIONS[currentLang].pipe_label;
+    const ratioLabelEl = document.getElementById('ratioLabel');
+    if (ratioLabelEl) ratioLabelEl.innerText = isGMV6HR ? 'דיברסיטי — יחס הספק מאיידים לעומת מעבים' : TRANSLATIONS[currentLang].ratio;
+    const unitCountLabelEl = document.getElementById('unitCountLabel');
+    if (unitCountLabelEl) unitCountLabelEl.innerText = isGMV6HR ? 'כמות מאיידים (עד 3 / 4 ומעלה)' : TRANSLATIONS[currentLang].unit_count;
 
     const isPrimeModular = (currentBrand === 'PRIME' && type === 'MODULAR');
     const isToshiba      = currentBrand === 'TOSHIBA';
@@ -1915,7 +1936,9 @@ function calculate() {
 
     if (factors["1"])     totalG += (parseFloat(document.getElementById('p10').value)  || 0) * factors["1"];
     if (factors["1 1/8"]) totalG += (parseFloat(document.getElementById('p118').value) || 0) * factors["1 1/8"];
-
+    const pipeTotalG = totalG;
+    let moduleExtraG = 0;
+    let selectedModules = 0;
     for (let i = 1; i <= 4; i++) {
         const sel = document.getElementById('modelSelect' + i);
         if (!sel) continue;
@@ -1927,7 +1950,10 @@ function calculate() {
                 const small = ['80','100','120','140','160'];
                 if (small.includes(model) && units > 2) totalG += (units - 2) * 300;
             } else if (ratio && greeFullData[model]) {
-                totalG += greeFullData[model][ratio][units >= 4 ? 1 : 0] * 1000;
+                const addG = greeFullData[model][ratio][units >= 4 ? 1 : 0] * 1000;
+                totalG += addG;
+                moduleExtraG += addG;
+                selectedModules++;
             }
         } else if (currentBrand === 'PRIME' && type === 'MODULAR') {
             const primeMap = {"MODULAR 18":0.5,"MODULAR 20":4,"MODULAR 22":4.5,"MODULAR 24":4.5,"MODULAR 26":5};
@@ -1938,6 +1964,16 @@ function calculate() {
     if (currentBrand === 'TOSHIBA') {
         totalG += toshibaCalcExtra();
         if (type === 'MODULAR') totalG += smmsuCalcExtra();
+    }
+    const hrSummary = document.getElementById('gmv6HrSummary');
+    const isHR = currentBrand === 'GREE' && type === 'GMV6_HR';
+    if (hrSummary) {
+        hrSummary.classList.toggle('hidden', !isHR);
+        if (isHR) {
+            const unitGroup = units >= 4 ? '4 מאיידים ומעלה' : 'עד 3 מאיידים';
+            const ratioText = ratio ? ratio.replace('-', '–') + '%' : 'לא נבחר';
+            hrSummary.innerHTML = `<strong style="color:var(--text)">פירוט חישוב GMV6 Heat Recovery</strong><br>צנרת נוזל: ${(pipeTotalG/1000).toFixed(3)} ק"ג<br>תוספת לפי ${selectedModules} מודול/ים, ${unitGroup}, דיברסיטי ${ratioText}: ${(moduleExtraG/1000).toFixed(3)} ק"ג`;
+        }
     }
     document.getElementById('totalResult').innerText = (totalG / 1000).toFixed(3);
 }
