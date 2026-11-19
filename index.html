@@ -712,6 +712,21 @@
             color: var(--text3);
             margin: 14px 0 8px;
         }
+
+        /* ===== ADMIN CONTENT EDITOR ===== */
+        .admin-only,.editor-tools,.editor-addbar{display:none!important}
+        body.tech-admin .admin-only,body.tech-admin .editor-tools,body.tech-admin .editor-addbar{display:flex!important}
+        .admin-toolbar{display:none;gap:7px;align-items:center;flex-wrap:wrap;padding:10px;margin-bottom:14px;background:rgba(255,193,7,.14);border:1px solid rgba(255,193,7,.5);border-radius:10px}
+        body.tech-admin .admin-toolbar{display:flex}
+        .editor-tools{gap:4px;margin-inline-start:auto;flex-wrap:wrap;align-items:center}
+        .editor-btn{border:1px solid var(--border);background:var(--surface);color:var(--text2);border-radius:7px;padding:5px 8px;font-family:Assistant,sans-serif;font-size:11px;font-weight:800;cursor:pointer}
+        .editor-btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.editor-btn.danger{color:var(--red)}
+        body.tech-admin [contenteditable="true"]{outline:1.5px dashed rgba(0,51,153,.35);outline-offset:2px;border-radius:4px;cursor:text;min-width:24px}
+        body.tech-admin [contenteditable="true"]:focus{outline:2px solid var(--blue);background:rgba(0,51,153,.06)}
+        body.tech-admin .tech-section-header{flex-wrap:wrap;gap:8px}
+        body.tech-admin .tech-param{grid-template-columns:52px minmax(100px,1fr) auto}
+        .editor-addbar{gap:6px;flex-wrap:wrap;padding-top:12px;margin-top:10px;border-top:1px dashed var(--border)}
+        .editor-step{position:relative}.editor-step>.editor-tools{position:static;margin-top:6px}
     </style>
 </head>
 <body>
@@ -796,7 +811,7 @@
         <div id="extraFields" class="hidden extra-section" style="margin-top:14px;">
             <div class="input-wrap" id="unitCountWrapper">
                 <div class="section-label" id="unitCountLabel">כמות מאיידים</div>
-                <input type="number" id="unitCount" min="0" step="1" placeholder="0" inputmode="numeric" oninput="calculate()">
+                <input type="number" id="unitCount" placeholder="0" inputmode="numeric" oninput="calculate()">
             </div>
             <div id="ratioWrapper">
                 <div class="section-label" id="ratioLabel">יחס העמסה (Ratio)</div>
@@ -939,8 +954,7 @@
             </div>
         </div>
 
-        <!-- GMV6 HR calculation summary -->
-        <div id="gmv6HrSummary" class="hidden" style="margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--text2);line-height:1.7;"></div>
+        <div id="gmv6HrSummary" class="hidden" style="margin-top:14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;color:var(--text2);line-height:1.7"></div>
         <!-- RESULT -->
         <div class="result-box" id="resultBox" style="background: var(--blue);">
             <div class="result-label" id="resultLabel">תוספת גז סופית נדרשת</div>
@@ -1047,6 +1061,12 @@
             <button class="btn-logout" onclick="techLogout()" data-i18n="tech_logout">יציאה</button>
         </div>
 
+        <div id="techAdminToolbar" class="admin-toolbar">
+            <strong style="font-size:13px;color:var(--text);">✏️ מצב עריכה — מנהל</strong>
+            <button type="button" class="editor-btn primary" onclick="editorAddSection()">+ טבלה חדשה</button>
+            <button type="button" class="editor-btn" onclick="editorResetBrand()">↺ שחזור המותג</button>
+            <span id="editorStatus" style="font-size:11px;color:var(--text3);margin-inline-start:auto;">השינויים נשמרים אוטומטית במכשיר</span>
+        </div>
         <!-- BRAND SELECTOR -->
         <div class="section-label" data-i18n="tech_choose_brand">בחר מותג</div>
         <div class="tech-brand-grid">
@@ -1435,7 +1455,7 @@ const TRANSLATIONS = {
         pipe_label: 'אורך צנרת נוזל בלבד (מטרים)',
         unit_count: 'כמות מאיידים', ratio: 'יחס העמסה (Ratio)',
         result_label: 'תוספת גז סופית נדרשת', clear: '↺ נקה נתונים',
-        mini: 'MINI — מיני VRF', modular: 'MODULAR — מודולרי', gmv6_hr: 'GMV6 - HEAT RECOVERY',
+        mini: 'MINI — מיני VRF', modular: 'MODULAR — מודולרי',
         choose_ratio: '— בחר יחס —',
         sat_title: 'R410A — לחץ ↔ טמפרטורת רוויה',
         sat_sub: 'מלא לחץ או טמפרטורה — הכל יחושב אוטומטית',
@@ -1463,7 +1483,7 @@ const TRANSLATIONS = {
         pipe_label: 'Liquid line length only (meters)',
         unit_count: 'Number of Indoor Units', ratio: 'Loading Ratio',
         result_label: 'Required Gas Charge', clear: '↺ Clear',
-        mini: 'MINI — Mini VRF', modular: 'MODULAR — Modular', gmv6_hr: 'GMV6 - HEAT RECOVERY',
+        mini: 'MINI — Mini VRF', modular: 'MODULAR — Modular',
         choose_ratio: '— Select ratio —',
         sat_title: 'R410A — Pressure ↔ Saturation Temp',
         sat_sub: 'Enter pressure or temperature — all fields update automatically',
@@ -1491,7 +1511,7 @@ const TRANSLATIONS = {
         pipe_label: 'طول أنبوب السائل فقط (بالأمتار)',
         unit_count: 'عدد الوحدات الداخلية', ratio: 'نسبة التحميل',
         result_label: 'كمية الغاز المطلوبة', clear: '↺ مسح',
-        mini: 'MINI — ميني VRF', modular: 'MODULAR — موديולار', gmv6_hr: 'GMV6 - HEAT RECOVERY',
+        mini: 'MINI — ميني VRF', modular: 'MODULAR — موديولار',
         choose_ratio: '— اختر النسبة —',
         sat_title: 'R410A — الضغط ↔ درجة حرارة التشبع',
         sat_sub: 'أدخل الضغط أو درجة الحرارة — يتم التحديث تلقائيًا',
@@ -1561,8 +1581,8 @@ function setLang(lang) {
     const sysType = document.getElementById('sysType');
     if (sysType) {
         sysType.options[0].text = t.mini;
-            sysType.options[1].text = t.modular;
-            if (sysType.options[2]) sysType.options[2].text = t.gmv6_hr;
+        sysType.options[1].text = t.modular;
+        if (sysType.options[2]) sysType.options[2].text = 'GMV6 - HEAT RECOVERY';
     }
     const ratio = document.getElementById('ratio');
     if (ratio && ratio.options[0]) ratio.options[0].text = t.choose_ratio;
@@ -1605,39 +1625,71 @@ window.addEventListener('DOMContentLoaded', () => setLang(currentLang));
 // TECHNICIAN PORTAL
 // ===========================
 const TECH_PASSWORD = 'Tadiran2026';
+const TECH_ADMIN_PASSWORD = 'Maor2026';
+let techIsAdmin = false;
+const EDITOR_KEY = 'vrf-tech-editor-v2-';
+const editorOriginal = {};
 
 function techLogin() {
     const pw = document.getElementById('techPassword').value;
-    if (pw === TECH_PASSWORD) {
-        localStorage.setItem('vrf-tech-auth', '1');
+    if (pw === TECH_PASSWORD || pw === TECH_ADMIN_PASSWORD) {
+        techIsAdmin = pw === TECH_ADMIN_PASSWORD;
+        localStorage.setItem('vrf-tech-auth', techIsAdmin ? 'admin' : 'viewer');
         showTechPortal();
     } else {
         document.getElementById('techError').style.display = 'block';
         document.getElementById('techPassword').value = '';
     }
 }
-
 function techLogout() {
-    localStorage.removeItem('vrf-tech-auth');
+    localStorage.removeItem('vrf-tech-auth'); techIsAdmin=false;
+    document.body.classList.remove('tech-admin');
     document.getElementById('techPortal').classList.add('hidden');
-    document.getElementById('techLock').style.display = 'block';
-    document.getElementById('techPassword').value = '';
-    document.getElementById('techError').style.display = 'none';
+    document.getElementById('techLock').style.display='block';
+    document.getElementById('techPassword').value='';
+    document.getElementById('techError').style.display='none';
 }
-
 function showTechPortal() {
-    document.getElementById('techLock').style.display = 'none';
+    editorCaptureOriginals(); editorLoadAll();
+    document.getElementById('techLock').style.display='none';
     document.getElementById('techPortal').classList.remove('hidden');
+    document.body.classList.toggle('tech-admin',techIsAdmin);
+    if(techIsAdmin) editorDecorateAll();
 }
-
-// Check on tab switch
 function checkTechAuth() {
-    if (localStorage.getItem('vrf-tech-auth') === '1') showTechPortal();
-    else {
-        document.getElementById('techLock').style.display = 'block';
-        document.getElementById('techPortal').classList.add('hidden');
-    }
+    const mode=localStorage.getItem('vrf-tech-auth');
+    techIsAdmin=mode==='admin';
+    if(mode==='admin'||mode==='viewer') showTechPortal();
+    else {document.getElementById('techLock').style.display='block';document.getElementById('techPortal').classList.add('hidden');}
 }
+function editorBrandEl(brand=currentTechBrand){return document.getElementById('tech-'+String(brand||'').toLowerCase())}
+function editorCaptureOriginals(){['GREE','PRIME','TOSHIBA'].forEach(b=>{const e=editorBrandEl(b);if(e&&!editorOriginal[b])editorOriginal[b]=e.innerHTML})}
+function editorLoadAll(){['GREE','PRIME','TOSHIBA'].forEach(b=>{const v=localStorage.getItem(EDITOR_KEY+b),e=editorBrandEl(b);if(v&&e)e.innerHTML=v})}
+function editorClean(clone){clone.querySelectorAll('.editor-tools,.editor-addbar').forEach(x=>x.remove());clone.querySelectorAll('[contenteditable]').forEach(x=>x.removeAttribute('contenteditable'));clone.querySelectorAll('.editor-step').forEach(x=>x.classList.remove('editor-step'))}
+function editorSave(brand=currentTechBrand){const e=editorBrandEl(brand);if(!e)return;const c=e.cloneNode(true);editorClean(c);localStorage.setItem(EDITOR_KEY+brand,c.innerHTML);const st=document.getElementById('editorStatus');if(st){st.textContent='✓ נשמר';setTimeout(()=>st.textContent='השינויים נשמרים אוטומטית במכשיר',900)}}
+function editorButton(text,action,danger=false){const b=document.createElement('button');b.type='button';b.className='editor-btn'+(danger?' danger':'');b.textContent=text;b.onclick=e=>{e.stopPropagation();action()};return b}
+function editorEditable(el){if(!el)return;el.contentEditable='true';el.oninput=()=>editorSave();el.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();el.blur()}}}
+function editorMove(el,dir){const p=el.parentElement;if(dir<0&&el.previousElementSibling)p.insertBefore(el,el.previousElementSibling);if(dir>0&&el.nextElementSibling)p.insertBefore(el.nextElementSibling,el);editorSave();editorDecorateAll()}
+function editorToolsFor(el,canEdit=true){const t=document.createElement('span');t.className='editor-tools';if(canEdit)t.append(editorButton('עריכה',()=>{const target=el.matches('.tech-section')?el.querySelector('.tech-section-header>span:first-child'):el;editorEditable(target);target.focus()}));t.append(editorButton('↑',()=>editorMove(el,-1)));t.append(editorButton('↓',()=>editorMove(el,1)));t.append(editorButton('מחיקה',()=>{if(confirm('למחוק פריט זה?')){el.remove();editorSave();editorDecorateAll()}},true));return t}
+function editorDecorateAll(){if(!techIsAdmin)return;['GREE','PRIME','TOSHIBA'].forEach(b=>editorDecorateBrand(editorBrandEl(b)))}
+function editorDecorateBrand(root){if(!root)return;root.querySelectorAll('.editor-tools,.editor-addbar').forEach(x=>x.remove());root.querySelectorAll('.tech-section').forEach(sec=>{
+ const h=sec.querySelector(':scope>.tech-section-header'),body=sec.querySelector(':scope>.tech-section-body');if(!h||!body)return;
+ editorEditable(h.querySelector('span:first-child'));h.append(editorToolsFor(sec,false));
+ body.querySelectorAll('.tech-sub-title').forEach(x=>{editorEditable(x);x.append(editorToolsFor(x,false))});
+ body.querySelectorAll('.tech-note').forEach(x=>{editorEditable(x);x.append(editorToolsFor(x,false))});
+ body.querySelectorAll('.tech-param').forEach(x=>{editorEditable(x.querySelector('.tech-param-code'));editorEditable(x.querySelector('.tech-param-text'));x.append(editorToolsFor(x,false))});
+ // PRIME custom numbered instruction cards
+ body.querySelectorAll('div[style*="align-items:flex-start"]').forEach(x=>{const spans=x.querySelectorAll(':scope>span');if(spans.length>=2){x.classList.add('editor-step');editorEditable(spans[0]);editorEditable(spans[1]);x.append(editorToolsFor(x,false))}});
+ const add=document.createElement('div');add.className='editor-addbar';add.append(editorButton('+ קוד ונושא',()=>editorAddParam(body)));add.append(editorButton('+ כותרת/נושא',()=>editorAddSubtitle(body)));add.append(editorButton('+ הערה צהובה',()=>editorAddNote(body)));add.append(editorButton('+ שלב הוראה',()=>editorAddStep(body)));body.append(add);
+ })}
+function editorInsert(body,node){const bar=body.querySelector(':scope>.editor-addbar');body.insertBefore(node,bar||null);editorSave();editorDecorateAll();node.scrollIntoView({behavior:'smooth',block:'center'})}
+function editorAddParam(body){const c=prompt('קוד חדש:');if(c===null)return;const v=prompt('נושא / הסבר:');if(!v)return;const n=document.createElement('div');n.className='tech-param';n.innerHTML='<span class="tech-param-code"></span><span class="tech-param-text"></span>';n.children[0].textContent=c;n.children[1].textContent=v;editorInsert(body,n)}
+function editorAddSubtitle(body){const v=prompt('שם הכותרת / הנושא:');if(!v)return;const n=document.createElement('div');n.className='tech-sub-title';n.textContent=v;editorInsert(body,n)}
+function editorAddNote(body){const v=prompt('הטקסט שיודגש בצהוב:');if(!v)return;const n=document.createElement('div');n.className='tech-note';n.textContent=v;editorInsert(body,n)}
+function editorAddStep(body){const num=prompt('מספר השלב:','1');if(num===null)return;const v=prompt('תוכן ההוראה:');if(!v)return;const n=document.createElement('div');n.className='editor-step';n.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-top:8px';n.innerHTML='<span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></span><span style="font-size:14px;color:var(--text)"></span>';n.children[0].textContent=num;n.children[1].textContent=v;editorInsert(body,n)}
+function editorAddSection(){if(!currentTechBrand){alert('יש לבחור מותג קודם');return}const v=prompt('שם הטבלה החדשה:');if(!v)return;const n=document.createElement('div');n.className='tech-section';n.innerHTML='<div class="tech-section-header" onclick="toggleTechSection(this)"><span></span><span>▾</span></div><div class="tech-section-body"></div>';n.querySelector('span').textContent=v;editorBrandEl().append(n);editorSave();editorDecorateAll()}
+function editorResetBrand(){if(!currentTechBrand||!confirm('לשחזר את המותג לתוכן המקורי?'))return;localStorage.removeItem(EDITOR_KEY+currentTechBrand);editorBrandEl().innerHTML=editorOriginal[currentTechBrand];editorDecorateAll()}
+window.addEventListener('DOMContentLoaded',editorCaptureOriginals);
 
 // ===========================
 // VIDEO TUTORIALS — LOCK
@@ -1689,6 +1741,7 @@ function selectTechBrand(brand, el) {
     el.classList.add('active');
     ['tech-gree','tech-prime','tech-toshiba'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('tech-' + brand.toLowerCase()).classList.remove('hidden');
+    if (techIsAdmin) editorDecorateBrand(editorBrandEl(brand));
 }
 
 function toggleTechSection(header) {
@@ -1831,25 +1884,17 @@ function initModels() {
                 ? ['PRIME 032','PRIME 04','PRIME 05','PRIME 06','PRIME 07','PRIME 08','PRIME 10','PRIME 12']
                 : ['MODULAR 08','MODULAR 10','MODULAR 12','MODULAR 14','MODULAR 16','MODULAR 18','MODULAR 20','MODULAR 22','MODULAR 24','MODULAR 26'];
         } else {
-            if (type === 'MINI') {
-                models = ['80','100','120','140','160','224','280','335'];
-            } else if (type === 'GMV6_HR') {
-                models = ['224','280','335','400','450','504','560','615'];
-            } else {
-                models = Object.keys(greeFullData);
-            }
+            if (type === 'MINI') models = ['80','100','120','140','160','224','280','335'];
+            else if (type === 'GMV6_HR') models = ['224','280','335','400','450','504','560','615'];
+            else models = Object.keys(greeFullData);
         }
 
         models.forEach(m => {
             const o = document.createElement('option');
             o.value = m;
-            // GMV6 Heat Recovery — display manufacturer module capacity in kW
             if (currentBrand === 'GREE' && type === 'GMV6_HR') {
-                const kw = {224:'22.4',280:'28.0',335:'33.5',400:'40.0',450:'45.0',504:'50.4',560:'56.0',615:'61.5'}[m];
-                o.innerText = `GMV6 HR ${kw} kW (GMV-${m})`;
-            } else {
-                o.innerText = (currentBrand === 'GREE') ? 'GMV-' + m : m;
-            }
+                const kw={224:'22.4',280:'28.0',335:'33.5',400:'40.0',450:'45.0',504:'50.4',560:'56.0',615:'61.5'}[m]; o.innerText=`GMV6 HR ${kw} kW (GMV-${m})`;
+            } else o.innerText=(currentBrand === 'GREE') ? 'GMV-' + m : m;
             sel.appendChild(o);
         });
         list.appendChild(sel);
@@ -1883,14 +1928,6 @@ function toggleUI() {
         if (currentBrand !== 'PRIME') document.getElementById('row10').classList.remove('hidden');
         if (currentBrand === 'GREE')  document.getElementById('row118').classList.remove('hidden');
     }
-
-    const isGMV6HR = (currentBrand === 'GREE' && type === 'GMV6_HR');
-    const pipeLabel = document.getElementById('pipeSectionLabel');
-    if (pipeLabel) pipeLabel.innerText = isGMV6HR ? 'אורך צנרת נוזל לפי קוטר (מטרים) — חישוב kg/m' : TRANSLATIONS[currentLang].pipe_label;
-    const ratioLabelEl = document.getElementById('ratioLabel');
-    if (ratioLabelEl) ratioLabelEl.innerText = isGMV6HR ? 'דיברסיטי — יחס הספק מאיידים לעומת מעבים' : TRANSLATIONS[currentLang].ratio;
-    const unitCountLabelEl = document.getElementById('unitCountLabel');
-    if (unitCountLabelEl) unitCountLabelEl.innerText = isGMV6HR ? 'כמות מאיידים (עד 3 / 4 ומעלה)' : TRANSLATIONS[currentLang].unit_count;
 
     const isPrimeModular = (currentBrand === 'PRIME' && type === 'MODULAR');
     const isToshiba      = currentBrand === 'TOSHIBA';
@@ -1936,9 +1973,8 @@ function calculate() {
 
     if (factors["1"])     totalG += (parseFloat(document.getElementById('p10').value)  || 0) * factors["1"];
     if (factors["1 1/8"]) totalG += (parseFloat(document.getElementById('p118').value) || 0) * factors["1 1/8"];
-    const pipeTotalG = totalG;
-    let moduleExtraG = 0;
-    let selectedModules = 0;
+    const pipeTotalG=totalG; let moduleExtraG=0; let selectedModules=0;
+
     for (let i = 1; i <= 4; i++) {
         const sel = document.getElementById('modelSelect' + i);
         if (!sel) continue;
@@ -1950,10 +1986,7 @@ function calculate() {
                 const small = ['80','100','120','140','160'];
                 if (small.includes(model) && units > 2) totalG += (units - 2) * 300;
             } else if (ratio && greeFullData[model]) {
-                const addG = greeFullData[model][ratio][units >= 4 ? 1 : 0] * 1000;
-                totalG += addG;
-                moduleExtraG += addG;
-                selectedModules++;
+                const addG=greeFullData[model][ratio][units >= 4 ? 1 : 0]*1000; totalG+=addG; moduleExtraG+=addG; selectedModules++;
             }
         } else if (currentBrand === 'PRIME' && type === 'MODULAR') {
             const primeMap = {"MODULAR 18":0.5,"MODULAR 20":4,"MODULAR 22":4.5,"MODULAR 24":4.5,"MODULAR 26":5};
@@ -1965,16 +1998,7 @@ function calculate() {
         totalG += toshibaCalcExtra();
         if (type === 'MODULAR') totalG += smmsuCalcExtra();
     }
-    const hrSummary = document.getElementById('gmv6HrSummary');
-    const isHR = currentBrand === 'GREE' && type === 'GMV6_HR';
-    if (hrSummary) {
-        hrSummary.classList.toggle('hidden', !isHR);
-        if (isHR) {
-            const unitGroup = units >= 4 ? '4 מאיידים ומעלה' : 'עד 3 מאיידים';
-            const ratioText = ratio ? ratio.replace('-', '–') + '%' : 'לא נבחר';
-            hrSummary.innerHTML = `<strong style="color:var(--text)">פירוט חישוב GMV6 Heat Recovery</strong><br>צנרת נוזל: ${(pipeTotalG/1000).toFixed(3)} ק"ג<br>תוספת לפי ${selectedModules} מודול/ים, ${unitGroup}, דיברסיטי ${ratioText}: ${(moduleExtraG/1000).toFixed(3)} ק"ג`;
-        }
-    }
+    const sm=document.getElementById('gmv6HrSummary'),isHR=currentBrand==='GREE'&&type==='GMV6_HR'; if(sm){sm.classList.toggle('hidden',!isHR);if(isHR){const ug=units>=4?'4 מאיידים ומעלה':'עד 3 מאיידים';sm.innerHTML=`<strong>פירוט חישוב GMV6 Heat Recovery</strong><br>צנרת נוזל: ${(pipeTotalG/1000).toFixed(3)} ק"ג<br>תוספת מודולים (${selectedModules}, ${ug}, דיברסיטי ${ratio}%): ${(moduleExtraG/1000).toFixed(3)} ק"ג`;}}
     document.getElementById('totalResult').innerText = (totalG / 1000).toFixed(3);
 }
 
