@@ -785,7 +785,7 @@
             <select id="sysType" onchange="initModels()">
                 <option value="MINI">MINI — מיני VRF</option>
                 <option value="MODULAR">MODULAR — מודולרי</option>
-                <option value="GMV6_HR">GMV6 - HEAT RECOVERY</option>
+                <option id="sysGmv6Hr" value="GMV6_HR">GMV6 - HEAT RECOVERY</option>
             </select>
         </div>
 
@@ -1066,6 +1066,12 @@
             <button type="button" class="editor-btn primary" onclick="editorAddSection()">+ טבלה חדשה</button>
             <button type="button" class="editor-btn" onclick="editorResetBrand()">↺ שחזור המותג</button>
             <span id="editorStatus" style="font-size:11px;color:var(--text3);margin-inline-start:auto;">השינויים נשמרים אוטומטית במכשיר</span>
+        </div>
+        <div id="gasNamesAdmin" class="admin-only" style="display:none;flex-direction:column;gap:10px;margin-bottom:14px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
+          <strong>⚙️ עריכת שמות בתוספת גז</strong>
+          <div style="font-size:12px;color:var(--text2)">שינוי שמות בלבד, ללא שינוי נתוני החישוב.</div>
+          <select id="gasEditBrand" onchange="renderGasNameEditor()"><option>GREE</option><option>PRIME</option><option>TOSHIBA</option></select>
+          <div id="gasNameEditorList"></div>
         </div>
         <!-- BRAND SELECTOR -->
         <div class="section-label" data-i18n="tech_choose_brand">בחר מותג</div>
@@ -1654,7 +1660,7 @@ function showTechPortal() {
     document.getElementById('techLock').style.display='none';
     document.getElementById('techPortal').classList.remove('hidden');
     document.body.classList.toggle('tech-admin',techIsAdmin);
-    if(techIsAdmin) editorDecorateAll();
+    if(techIsAdmin){editorDecorateAll();renderGasNameEditor()}
 }
 function checkTechAuth() {
     const mode=localStorage.getItem('vrf-tech-auth');
@@ -1691,6 +1697,15 @@ function editorAddSection(){if(!currentTechBrand){alert('יש לבחור מות�
 function editorResetBrand(){if(!currentTechBrand||!confirm('לשחזר את המותג לתוכן המקורי?'))return;localStorage.removeItem(EDITOR_KEY+currentTechBrand);editorBrandEl().innerHTML=editorOriginal[currentTechBrand];editorDecorateAll()}
 window.addEventListener('DOMContentLoaded',editorCaptureOriginals);
 
+// ===========================
+// ADMIN GAS NAMES
+const GAS_NAMES_KEY='vrf-gas-display-names-v1';
+function gasLoad(){try{return JSON.parse(localStorage.getItem(GAS_NAMES_KEY)||'{}')}catch(e){return {}}}
+function gasName(b,k,key,f){return gasLoad()?.[b]?.[k]?.[key]||f}
+function gasSaveName(b,k,key,v){let d=gasLoad();d[b]=d[b]||{};d[b][k]=d[b][k]||{};d[b][k][key]=String(v||'').trim();localStorage.setItem(GAS_NAMES_KEY,JSON.stringify(d));if(currentBrand===b){applySystemTypes();initModels()}}
+function applySystemTypes(){let s=document.getElementById('sysType'),h=document.getElementById('sysGmv6Hr');if(!s||!currentBrand)return;if(h)h.hidden=currentBrand!=='GREE';if(currentBrand!=='GREE'&&s.value==='GMV6_HR')s.value='MINI';let base={MINI:'MINI — מיני VRF',MODULAR:'MODULAR — מודולרי',GMV6_HR:'GMV6 - HEAT RECOVERY'};[...s.options].forEach(o=>o.textContent=gasName(currentBrand,'types',o.value,base[o.value]||o.textContent))}
+function gasAdminModels(b){return b==='GREE'?{MINI:['80','100','120','140','160','224','280','335'],MODULAR:Object.keys(greeFullData),GMV6_HR:['224','280','335','400','450','504','560','615']}:b==='PRIME'?{MINI:['PRIME 032','PRIME 04','PRIME 05','PRIME 06','PRIME 07','PRIME 08','PRIME 10','PRIME 12'],MODULAR:['MODULAR 08','MODULAR 10','MODULAR 12','MODULAR 14','MODULAR 16','MODULAR 18','MODULAR 20','MODULAR 22','MODULAR 24','MODULAR 26']}:{MINI:['MCY-MHP0404','MCY-MHP0504','MCY-MHP0604','MCY-0806','MCY-1006','MCY-1004','MCY-1204','MCY-1206'],MODULAR:['SMMSU']}}
+function renderGasNameEditor(){if(!techIsAdmin)return;let r=document.getElementById('gasNameEditorList'),b=document.getElementById('gasEditBrand').value;if(!r)return;r.innerHTML='';let base={MINI:'MINI — מיני VRF',MODULAR:'MODULAR — מודולרי',GMV6_HR:'GMV6 - HEAT RECOVERY'},types=b==='GREE'?['MINI','MODULAR','GMV6_HR']:['MINI','MODULAR'];function add(label,k,key,f){let w=document.createElement('div');w.style='display:grid;grid-template-columns:110px 1fr;gap:8px;margin:6px 0';let l=document.createElement('span');l.textContent=label;let i=document.createElement('input');i.type='text';i.value=gasName(b,k,key,f);i.onchange=()=>gasSaveName(b,k,key,i.value);w.append(l,i);r.append(w)}types.forEach(t=>add('סוג מערכת','types',t,base[t]));Object.entries(gasAdminModels(b)).forEach(([t,a])=>a.forEach(m=>add('דגם '+t,'models',t+'|'+m,b==='GREE'?'GMV-'+m:m)))}
 // ===========================
 // VIDEO TUTORIALS — LOCK
 // ===========================
@@ -1849,6 +1864,7 @@ function selectBrand(brand) {
     if (f10)  f10.innerText  = f["1"]     ? `(${f["1"]}g)`     : '';
     if (f118) f118.innerText = f["1 1/8"] ? `(${f["1 1/8"]}g)` : '';
 
+    applySystemTypes();
     initModels();
 }
 
@@ -1895,6 +1911,7 @@ function initModels() {
             if (currentBrand === 'GREE' && type === 'GMV6_HR') {
                 const kw={224:'22.4',280:'28.0',335:'33.5',400:'40.0',450:'45.0',504:'50.4',560:'56.0',615:'61.5'}[m]; o.innerText=`GMV6 HR ${kw} kW (GMV-${m})`;
             } else o.innerText=(currentBrand === 'GREE') ? 'GMV-' + m : m;
+            o.innerText=gasName(currentBrand,'models',type+'|'+m,o.innerText);
             sel.appendChild(o);
         });
         list.appendChild(sel);
