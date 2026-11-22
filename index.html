@@ -727,6 +727,16 @@
         body.tech-admin .tech-param{grid-template-columns:52px minmax(100px,1fr) auto}
         .editor-addbar{gap:6px;flex-wrap:wrap;padding-top:12px;margin-top:10px;border-top:1px dashed var(--border)}
         .editor-step{position:relative}.editor-step>.editor-tools{position:static;margin-top:6px}
+
+        /* ===== SYNC / GITHUB PANEL ===== */
+        .sync-box{display:none;flex-direction:column;gap:8px;padding:12px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+        .sync-box.open{display:flex}
+        .sync-box input{width:100%;padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:Assistant,sans-serif;font-size:13px;direction:ltr;text-align:left}
+        .sync-box label{font-size:12px;font-weight:800;color:var(--text2)}
+        .sync-row{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center}
+        .sync-hint{font-size:11px;color:var(--text3);line-height:1.6}
+        .gas-name-row input{direction:rtl;text-align:right}
+        #editorStatus.ok{color:#1b8a3a}#editorStatus.warn{color:#c0392b}#editorStatus.busy{color:#b7791f}
     </style>
 </head>
 <body>
@@ -785,7 +795,7 @@
             <select id="sysType" onchange="initModels()">
                 <option value="MINI">MINI — מיני VRF</option>
                 <option value="MODULAR">MODULAR — מודולרי</option>
-                <option id="sysGmv6Hr" value="GMV6_HR">GMV6 - HEAT RECOVERY</option>
+                <option value="GMV6_HR">GMV6 - HEAT RECOVERY</option>
             </select>
         </div>
 
@@ -1065,13 +1075,20 @@
             <strong style="font-size:13px;color:var(--text);">✏️ מצב עריכה — מנהל</strong>
             <button type="button" class="editor-btn primary" onclick="editorAddSection()">+ טבלה חדשה</button>
             <button type="button" class="editor-btn" onclick="editorResetBrand()">↺ שחזור המותג</button>
-            <span id="editorStatus" style="font-size:11px;color:var(--text3);margin-inline-start:auto;">השינויים נשמרים אוטומטית במכשיר</span>
+            <button type="button" class="editor-btn primary" style="background:#1b8a3a;border-color:#1b8a3a" onclick="siteSaveFile()">💾 שמור והורד index.html</button>
+            <button type="button" class="editor-btn primary" onclick="siteTogglePanel('gasNamesBox')">✏️ שמות דגמים / סוג מערכת</button>
+            <button type="button" class="editor-btn danger" onclick="siteDiscardLocal()">בטל שינויים שלא נשמרו</button>
+            <span id="editorStatus" style="font-size:11px;color:var(--text3);margin-inline-start:auto;">טוען...</span>
         </div>
-        <div id="gasNamesAdmin" class="admin-only" style="display:none;flex-direction:column;gap:10px;margin-bottom:14px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;">
-          <strong>⚙️ עריכת שמות בתוספת גז</strong>
-          <div style="font-size:12px;color:var(--text2)">שינוי שמות בלבד, ללא שינוי נתוני החישוב.</div>
-          <select id="gasEditBrand" onchange="renderGasNameEditor()"><option>GREE</option><option>PRIME</option><option>TOSHIBA</option></select>
-          <div id="gasNameEditorList"></div>
+
+        <!-- GAS NAMES EDITOR (admin only) -->
+        <div id="gasNamesBox" class="sync-box">
+            <strong style="font-size:13px;color:var(--text);">✏️ עריכת שמות בתוספת גז</strong>
+            <div class="sync-hint">משנה רק את השם שמוצג. נתוני החישוב לא משתנים. שדה ריק = חזרה לשם המקורי. בסיום לחץ "שמור והורד index.html".</div>
+            <select id="gasEditBrand" onchange="renderGasNameEditor()">
+                <option value="GREE">GREE</option><option value="PRIME">PRIME</option><option value="TOSHIBA">TOSHIBA</option>
+            </select>
+            <div id="gasNameEditorList"></div>
         </div>
         <!-- BRAND SELECTOR -->
         <div class="section-label" data-i18n="tech_choose_brand">בחר מותג</div>
@@ -1448,6 +1465,177 @@
     </div>
 </div>
 
+<script id="site-data" type="application/json">{
+  "version": 1,
+  "updated": 0,
+  "gasNames": {},
+  "tech": {
+    "GREE": null,
+    "PRIME": null,
+    "TOSHIBA": null
+  }
+}</script>
+<script>
+/* ==========================================================
+   sync.js — עריכת מנהל + כפתור "שמור והורד index.html"
+   * השינויים נשמרים במכשיר בזמן העריכה.
+   * בלחיצה על "שמור" נוצר index.html חדש שכולל את כל השינויים.
+   * מעלים אותו ל-GitHub במקום הישן וכולם רואים את השינויים.
+   ========================================================== */
+(function () {
+    'use strict';
+    var CACHE_KEY = 'vrf-site-data-v1';
+    var EDITOR_KEY = 'vrf-tech-editor-v2-';
+    var BRANDS = ['GREE', 'PRIME', 'TOSHIBA'];
+
+    function blank() { return { version: 1, updated: 0, gasNames: {}, tech: { GREE: null, PRIME: null, TOSHIBA: null } }; }
+    function normalize(d) {
+        var o = blank();
+        if (!d || typeof d !== 'object') return o;
+        o.updated = Number(d.updated) || 0;
+        o.gasNames = (d.gasNames && typeof d.gasNames === 'object') ? d.gasNames : {};
+        BRANDS.forEach(function (b) { o.tech[b] = (d.tech && typeof d.tech[b] === 'string') ? d.tech[b] : null; });
+        return o;
+    }
+    function readJSON(key) { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } }
+
+    // הנתונים שנאפו לתוך הקובץ (מה שכולם רואים)
+    var BAKED = (function () {
+        var el = document.getElementById('site-data');
+        try { return normalize(JSON.parse(el.textContent)); } catch (e) { return blank(); }
+    })();
+    var SITE = blank();
+    var local = normalize(readJSON(CACHE_KEY));
+    // הגרסה החדשה יותר מנצחת: עריכה מקומית שלא נשמרה / או הקובץ המעודכן
+    SITE = (local.updated > BAKED.updated) ? local : BAKED;
+
+    function saveCache() { try { localStorage.setItem(CACHE_KEY, JSON.stringify(SITE)); } catch (e) {} }
+    function mirrorTechToLocal() {
+        BRANDS.forEach(function (b) {
+            try {
+                if (typeof SITE.tech[b] === 'string') localStorage.setItem(EDITOR_KEY + b, SITE.tech[b]);
+                else localStorage.removeItem(EDITOR_KEY + b);
+            } catch (e) {}
+        });
+    }
+    function collectTech() {
+        BRANDS.forEach(function (b) {
+            var v = null; try { v = localStorage.getItem(EDITOR_KEY + b); } catch (e) {}
+            SITE.tech[b] = (typeof v === 'string') ? v : null;
+        });
+    }
+    // חייב לרוץ לפני שהאתר קורא את תוכן הטכנאים
+    saveCache();
+    mirrorTechToLocal();
+
+    // ---------- שמות מוצגים ----------
+    window.gasName = function (brand, kind, key, fallback) {
+        var g = SITE.gasNames, v = g && g[brand] && g[brand][kind] && g[brand][kind][key];
+        return (typeof v === 'string' && v.trim()) ? v : fallback;
+    };
+    function gasSetName(brand, kind, key, value) {
+        var g = SITE.gasNames; g[brand] = g[brand] || {}; g[brand][kind] = g[brand][kind] || {};
+        var v = String(value || '').trim();
+        if (v) g[brand][kind][key] = v; else delete g[brand][kind][key];
+        gasRefreshLabels();
+        window.siteDataChanged();
+    }
+    function gasRefreshLabels() {
+        if (typeof applySystemTypes !== 'function') return;
+        applySystemTypes();
+        var sys = document.getElementById('sysType');
+        if (!sys || typeof currentBrand === 'undefined' || !currentBrand) return;
+        document.querySelectorAll('#modelList select').forEach(function (sel) {
+            Array.prototype.forEach.call(sel.options, function (o) {
+                if (o.value) o.text = modelLabel(currentBrand, sys.value, o.value);
+            });
+        });
+    }
+
+    window.renderGasNameEditor = function () {
+        var root = document.getElementById('gasNameEditorList'), bs = document.getElementById('gasEditBrand');
+        if (!root || !bs || typeof getModelList !== 'function') return;
+        var b = bs.value; root.innerHTML = '';
+        var types = b === 'GREE' ? ['MINI', 'MODULAR', 'GMV6_HR'] : ['MINI', 'MODULAR'];
+        function addRow(title, kind, key, fallback) {
+            var w = document.createElement('div'); w.className = 'sync-row gas-name-row';
+            var l = document.createElement('label'); l.textContent = title;
+            var i = document.createElement('input'); i.type = 'text';
+            i.value = window.gasName(b, kind, key, fallback); i.placeholder = fallback;
+            i.addEventListener('change', function () { gasSetName(b, kind, key, i.value); });
+            w.appendChild(l); w.appendChild(i); root.appendChild(w);
+        }
+        function head(text) {
+            var h = document.createElement('div');
+            h.style.cssText = 'font-size:12px;font-weight:800;color:var(--blue);margin-top:10px';
+            h.textContent = text; root.appendChild(h);
+        }
+        head('סוגי מערכת');
+        types.forEach(function (t) { addRow('סוג מערכת', 'types', t, defaultTypeLabel(t)); });
+        types.forEach(function (t) {
+            head('דגמים — ' + defaultTypeLabel(t));
+            getModelList(b, t).forEach(function (m) { addRow('דגם', 'models', t + '|' + m, defaultModelLabel(b, t, m)); });
+        });
+    };
+
+    // ---------- סטטוס ----------
+    function setStatus() {
+        var el = document.getElementById('editorStatus'); if (!el) return;
+        var dirty = SITE.updated > BAKED.updated;
+        el.textContent = dirty ? '⚠️ יש שינויים שלא נשמרו לקובץ — לחץ "שמור והורד index.html"' : '✓ אין שינויים חדשים';
+        el.className = dirty ? 'warn' : 'ok';
+    }
+    window.siteDataChanged = function () {
+        collectTech(); SITE.updated = Date.now(); saveCache(); setStatus();
+    };
+
+    window.siteTogglePanel = function (id) {
+        var e = document.getElementById(id); if (!e) return;
+        e.classList.toggle('open');
+        if (id === 'gasNamesBox' && e.classList.contains('open')) window.renderGasNameEditor();
+    };
+
+    // ---------- יצירת index.html חדש ----------
+    function safeJSON(obj) {
+        return JSON.stringify(obj, null, 2).replace(/</g, '\\u003c').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
+    }
+    window.siteSaveFile = async function () {
+        collectTech();
+        if (!SITE.updated) SITE.updated = Date.now();
+        saveCache();
+        var src;
+        try {
+            var r = await fetch(location.href.split('#')[0].split('?')[0], { cache: 'no-store' });
+            if (!r.ok) throw 0;
+            src = await r.text();
+        } catch (e) {
+            alert('לא ניתן ליצור קובץ כשהאתר נפתח מהמחשב. פתח את האתר מכתובת GitHub Pages ונסה שוב.');
+            return;
+        }
+        var re = /<script id="site-data" type="application\/json">[\s\S]*?<\/script>/;
+        if (!re.test(src)) { alert('לא נמצא אזור הנתונים בקובץ האתר.'); return; }
+        var block = '<script id="site-data" type="application/json">' + safeJSON(SITE) + '</' + 'script>';
+        var out = src.replace(re, function () { return block; });
+        var blob = new Blob([out], { type: 'text/html;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'index.html';
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+        var el = document.getElementById('editorStatus');
+        if (el) { el.textContent = '✓ index.html הורד — החלף אותו ב-GitHub'; el.className = 'ok'; }
+    };
+
+    window.siteDiscardLocal = function () {
+        if (!confirm('לבטל את כל השינויים שלא נשמרו ולחזור לגרסה שבאתר?')) return;
+        SITE = normalize(BAKED); saveCache(); mirrorTechToLocal(); location.reload();
+    };
+
+    window.siteAdminInit = function () { window.renderGasNameEditor(); setStatus(); };
+    window.addEventListener('load', function () { gasRefreshLabels(); });
+})();
+
+</script>
 <script>
 // ===========================
 // TRANSLATIONS
@@ -1585,11 +1773,7 @@ function setLang(lang) {
 
     // Select options
     const sysType = document.getElementById('sysType');
-    if (sysType) {
-        sysType.options[0].text = t.mini;
-        sysType.options[1].text = t.modular;
-        if (sysType.options[2]) sysType.options[2].text = 'GMV6 - HEAT RECOVERY';
-    }
+    if (sysType) { applySystemTypes(); }
     const ratio = document.getElementById('ratio');
     if (ratio && ratio.options[0]) ratio.options[0].text = t.choose_ratio;
 
@@ -1660,7 +1844,7 @@ function showTechPortal() {
     document.getElementById('techLock').style.display='none';
     document.getElementById('techPortal').classList.remove('hidden');
     document.body.classList.toggle('tech-admin',techIsAdmin);
-    if(techIsAdmin){editorDecorateAll();renderGasNameEditor()}
+    if(techIsAdmin){ editorDecorateAll(); if(window.siteAdminInit) siteAdminInit(); }
 }
 function checkTechAuth() {
     const mode=localStorage.getItem('vrf-tech-auth');
@@ -1672,7 +1856,7 @@ function editorBrandEl(brand=currentTechBrand){return document.getElementById('t
 function editorCaptureOriginals(){['GREE','PRIME','TOSHIBA'].forEach(b=>{const e=editorBrandEl(b);if(e&&!editorOriginal[b])editorOriginal[b]=e.innerHTML})}
 function editorLoadAll(){['GREE','PRIME','TOSHIBA'].forEach(b=>{const v=localStorage.getItem(EDITOR_KEY+b),e=editorBrandEl(b);if(v&&e)e.innerHTML=v})}
 function editorClean(clone){clone.querySelectorAll('.editor-tools,.editor-addbar').forEach(x=>x.remove());clone.querySelectorAll('[contenteditable]').forEach(x=>x.removeAttribute('contenteditable'));clone.querySelectorAll('.editor-step').forEach(x=>x.classList.remove('editor-step'))}
-function editorSave(brand=currentTechBrand){const e=editorBrandEl(brand);if(!e)return;const c=e.cloneNode(true);editorClean(c);localStorage.setItem(EDITOR_KEY+brand,c.innerHTML);const st=document.getElementById('editorStatus');if(st){st.textContent='✓ נשמר';setTimeout(()=>st.textContent='השינויים נשמרים אוטומטית במכשיר',900)}}
+function editorSave(brand=currentTechBrand){const e=editorBrandEl(brand);if(!e)return;const c=e.cloneNode(true);editorClean(c);localStorage.setItem(EDITOR_KEY+brand,c.innerHTML);const st=document.getElementById('editorStatus');if(st){}if(window.siteDataChanged)siteDataChanged();}
 function editorButton(text,action,danger=false){const b=document.createElement('button');b.type='button';b.className='editor-btn'+(danger?' danger':'');b.textContent=text;b.onclick=e=>{e.stopPropagation();action()};return b}
 function editorEditable(el){if(!el)return;el.contentEditable='true';el.oninput=()=>editorSave();el.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();el.blur()}}}
 function editorMove(el,dir){const p=el.parentElement;if(dir<0&&el.previousElementSibling)p.insertBefore(el,el.previousElementSibling);if(dir>0&&el.nextElementSibling)p.insertBefore(el.nextElementSibling,el);editorSave();editorDecorateAll()}
@@ -1694,18 +1878,9 @@ function editorAddSubtitle(body){const v=prompt('שם הכותרת / הנושא:
 function editorAddNote(body){const v=prompt('הטקסט שיודגש בצהוב:');if(!v)return;const n=document.createElement('div');n.className='tech-note';n.textContent=v;editorInsert(body,n)}
 function editorAddStep(body){const num=prompt('מספר השלב:','1');if(num===null)return;const v=prompt('תוכן ההוראה:');if(!v)return;const n=document.createElement('div');n.className='editor-step';n.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);margin-top:8px';n.innerHTML='<span style="background:var(--blue);color:#fff;font-weight:800;font-size:12px;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></span><span style="font-size:14px;color:var(--text)"></span>';n.children[0].textContent=num;n.children[1].textContent=v;editorInsert(body,n)}
 function editorAddSection(){if(!currentTechBrand){alert('יש לבחור מותג קודם');return}const v=prompt('שם הטבלה החדשה:');if(!v)return;const n=document.createElement('div');n.className='tech-section';n.innerHTML='<div class="tech-section-header" onclick="toggleTechSection(this)"><span></span><span>▾</span></div><div class="tech-section-body"></div>';n.querySelector('span').textContent=v;editorBrandEl().append(n);editorSave();editorDecorateAll()}
-function editorResetBrand(){if(!currentTechBrand||!confirm('לשחזר את המותג לתוכן המקורי?'))return;localStorage.removeItem(EDITOR_KEY+currentTechBrand);editorBrandEl().innerHTML=editorOriginal[currentTechBrand];editorDecorateAll()}
+function editorResetBrand(){if(!currentTechBrand||!confirm('לשחזר את המותג לתוכן המקורי?'))return;localStorage.removeItem(EDITOR_KEY+currentTechBrand);editorBrandEl().innerHTML=editorOriginal[currentTechBrand];editorDecorateAll();if(window.siteDataChanged)siteDataChanged()}
 window.addEventListener('DOMContentLoaded',editorCaptureOriginals);
 
-// ===========================
-// ADMIN GAS NAMES
-const GAS_NAMES_KEY='vrf-gas-display-names-v1';
-function gasLoad(){try{return JSON.parse(localStorage.getItem(GAS_NAMES_KEY)||'{}')}catch(e){return {}}}
-function gasName(b,k,key,f){return gasLoad()?.[b]?.[k]?.[key]||f}
-function gasSaveName(b,k,key,v){let d=gasLoad();d[b]=d[b]||{};d[b][k]=d[b][k]||{};d[b][k][key]=String(v||'').trim();localStorage.setItem(GAS_NAMES_KEY,JSON.stringify(d));if(currentBrand===b){applySystemTypes();initModels()}}
-function applySystemTypes(){let s=document.getElementById('sysType'),h=document.getElementById('sysGmv6Hr');if(!s||!currentBrand)return;if(h)h.hidden=currentBrand!=='GREE';if(currentBrand!=='GREE'&&s.value==='GMV6_HR')s.value='MINI';let base={MINI:'MINI — מיני VRF',MODULAR:'MODULAR — מודולרי',GMV6_HR:'GMV6 - HEAT RECOVERY'};[...s.options].forEach(o=>o.textContent=gasName(currentBrand,'types',o.value,base[o.value]||o.textContent))}
-function gasAdminModels(b){return b==='GREE'?{MINI:['80','100','120','140','160','224','280','335'],MODULAR:Object.keys(greeFullData),GMV6_HR:['224','280','335','400','450','504','560','615']}:b==='PRIME'?{MINI:['PRIME 032','PRIME 04','PRIME 05','PRIME 06','PRIME 07','PRIME 08','PRIME 10','PRIME 12'],MODULAR:['MODULAR 08','MODULAR 10','MODULAR 12','MODULAR 14','MODULAR 16','MODULAR 18','MODULAR 20','MODULAR 22','MODULAR 24','MODULAR 26']}:{MINI:['MCY-MHP0404','MCY-MHP0504','MCY-MHP0604','MCY-0806','MCY-1006','MCY-1004','MCY-1204','MCY-1206'],MODULAR:['SMMSU']}}
-function renderGasNameEditor(){if(!techIsAdmin)return;let r=document.getElementById('gasNameEditorList'),b=document.getElementById('gasEditBrand').value;if(!r)return;r.innerHTML='';let base={MINI:'MINI — מיני VRF',MODULAR:'MODULAR — מודולרי',GMV6_HR:'GMV6 - HEAT RECOVERY'},types=b==='GREE'?['MINI','MODULAR','GMV6_HR']:['MINI','MODULAR'];function add(label,k,key,f){let w=document.createElement('div');w.style='display:grid;grid-template-columns:110px 1fr;gap:8px;margin:6px 0';let l=document.createElement('span');l.textContent=label;let i=document.createElement('input');i.type='text';i.value=gasName(b,k,key,f);i.onchange=()=>gasSaveName(b,k,key,i.value);w.append(l,i);r.append(w)}types.forEach(t=>add('סוג מערכת','types',t,base[t]));Object.entries(gasAdminModels(b)).forEach(([t,a])=>a.forEach(m=>add('דגם '+t,'models',t+'|'+m,b==='GREE'?'GMV-'+m:m)))}
 // ===========================
 // VIDEO TUTORIALS — LOCK
 // ===========================
@@ -1868,6 +2043,55 @@ function selectBrand(brand) {
     initModels();
 }
 
+// ===== רשימות דגמים ושמות מוצגים =====
+function getModelList(brand, type) {
+    if (brand === 'TOSHIBA') {
+        return type === 'MINI' ? [
+            'MCY-MHP0404','MCY-MHP0504','MCY-MHP0604',
+            'MCY-0806','MCY-1006','MCY-1004','MCY-1204','MCY-1206'
+        ] : ['SMMSU'];
+    }
+    if (brand === 'PRIME') {
+        return type === 'MINI'
+            ? ['PRIME 032','PRIME 04','PRIME 05','PRIME 06','PRIME 07','PRIME 08','PRIME 10','PRIME 12']
+            : ['MODULAR 08','MODULAR 10','MODULAR 12','MODULAR 14','MODULAR 16','MODULAR 18','MODULAR 20','MODULAR 22','MODULAR 24','MODULAR 26'];
+    }
+    if (type === 'MINI') return ['80','100','120','140','160','224','280','335'];
+    if (type === 'GMV6_HR') return ['224','280','335','400','450','504','560','615'];
+    return Object.keys(greeFullData);
+}
+function defaultModelLabel(brand, type, m) {
+    if (brand === 'GREE' && type === 'GMV6_HR') {
+        const kw={224:'22.4',280:'28.0',335:'33.5',400:'40.0',450:'45.0',504:'50.4',560:'56.0',615:'61.5'}[m];
+        return `GMV6 HR ${kw} kW (GMV-${m})`;
+    }
+    return brand === 'GREE' ? 'GMV-' + m : m;
+}
+function modelLabel(brand, type, m) {
+    return gasName(brand, 'models', type + '|' + m, defaultModelLabel(brand, type, m));
+}
+function defaultTypeLabel(type) {
+    const t = TRANSLATIONS[currentLang] || TRANSLATIONS.he;
+    return type === 'MINI' ? t.mini : type === 'MODULAR' ? t.modular : 'GMV6 - HEAT RECOVERY';
+}
+function typeLabel(brand, type) {
+    return gasName(brand, 'types', type, defaultTypeLabel(type));
+}
+// GMV6 HEAT RECOVERY קיים רק במותג GREE
+function applySystemTypes() {
+    const sel = document.getElementById('sysType');
+    if (!sel) return;
+    const keep = sel.value;
+    const types = (currentBrand && currentBrand !== 'GREE') ? ['MINI','MODULAR'] : ['MINI','MODULAR','GMV6_HR'];
+    sel.innerHTML = '';
+    types.forEach(tp => {
+        const o = document.createElement('option');
+        o.value = tp; o.textContent = typeLabel(currentBrand, tp);
+        sel.appendChild(o);
+    });
+    sel.value = types.includes(keep) ? keep : 'MINI';
+}
+
 function initModels() {
     if (!currentBrand) return;
     const type = document.getElementById('sysType').value;
@@ -1889,29 +2113,10 @@ function initModels() {
         def.innerText = count > 1 ? `— מעבה ${i} —` : '— בחר דגם —';
         sel.appendChild(def);
 
-        let models = [];
-        if (currentBrand === 'TOSHIBA') {
-            models = type === 'MINI' ? [
-                'MCY-MHP0404','MCY-MHP0504','MCY-MHP0604',
-                'MCY-0806','MCY-1006','MCY-1004','MCY-1204','MCY-1206'
-            ] : ['SMMSU'];
-        } else if (currentBrand === 'PRIME') {
-            models = type === 'MINI'
-                ? ['PRIME 032','PRIME 04','PRIME 05','PRIME 06','PRIME 07','PRIME 08','PRIME 10','PRIME 12']
-                : ['MODULAR 08','MODULAR 10','MODULAR 12','MODULAR 14','MODULAR 16','MODULAR 18','MODULAR 20','MODULAR 22','MODULAR 24','MODULAR 26'];
-        } else {
-            if (type === 'MINI') models = ['80','100','120','140','160','224','280','335'];
-            else if (type === 'GMV6_HR') models = ['224','280','335','400','450','504','560','615'];
-            else models = Object.keys(greeFullData);
-        }
-
-        models.forEach(m => {
+        getModelList(currentBrand, type).forEach(m => {
             const o = document.createElement('option');
             o.value = m;
-            if (currentBrand === 'GREE' && type === 'GMV6_HR') {
-                const kw={224:'22.4',280:'28.0',335:'33.5',400:'40.0',450:'45.0',504:'50.4',560:'56.0',615:'61.5'}[m]; o.innerText=`GMV6 HR ${kw} kW (GMV-${m})`;
-            } else o.innerText=(currentBrand === 'GREE') ? 'GMV-' + m : m;
-            o.innerText=gasName(currentBrand,'models',type+'|'+m,o.innerText);
+            o.innerText = modelLabel(currentBrand, type, m);
             sel.appendChild(o);
         });
         list.appendChild(sel);
@@ -2639,5 +2844,6 @@ function removeSMMSUUnit(idx) {
 
 
 </script>
+
 </body>
 </html>
